@@ -169,16 +169,35 @@ def main():
     p.add_argument('--repo-name')
     args = p.parse_args()
 
-    env = os.environ
-    cf_token = env.get('CF_API_TOKEN')
-    cf_zone_id = env.get('CF_ZONE_ID')
-    cf_zone_name = env.get('CF_ZONE_NAME')
-    gh_pat = env.get('GH_PAT')
-    template_owner = env.get('TEMPLATE_OWNER') or env.get('GITHUB_ACTOR')
-    template_repo = env.get('TEMPLATE_REPO')  # optional
-    gh_owner = env.get('GH_OWNER')
-    issue_number = env.get('ISSUE_NUMBER')
-    issue_repo = env.get('ISSUE_REPO')
+    # Load local .env first (takes precedence), then fall back to environment (GitHub secrets)
+    def load_local_env(path='.env'):
+        d = {}
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith('#'):
+                        continue
+                    if '=' in line:
+                        k, v = line.split('=', 1)
+                        d[k.strip()] = v.strip()
+        except FileNotFoundError:
+            pass
+        return d
+
+    _local_env = load_local_env()
+    def get_env(key):
+        return _local_env.get(key) if key in _local_env else os.environ.get(key)
+
+    cf_token = get_env('CF_API_TOKEN')
+    cf_zone_id = get_env('CF_ZONE_ID')
+    cf_zone_name = get_env('CF_ZONE_NAME')
+    gh_pat = get_env('GH_PAT')
+    template_owner = get_env('TEMPLATE_OWNER') or get_env('GITHUB_ACTOR')
+    template_repo = get_env('TEMPLATE_REPO')  # optional
+    gh_owner = get_env('GH_OWNER')
+    issue_number = get_env('ISSUE_NUMBER')
+    issue_repo = get_env('ISSUE_REPO')
 
     if not all([cf_token, cf_zone_id, cf_zone_name, gh_pat, gh_owner]):
         die('Missing required environment variables. Set CF_API_TOKEN, CF_ZONE_ID, CF_ZONE_NAME, GH_PAT, GH_OWNER (TEMPLATE_REPO optional)')

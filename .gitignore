@@ -1,0 +1,10 @@
+# Ignore local environment with secrets
+.env
+.env.local
+# Python
+__pycache__/
+*.py[cod]
+# Byte-compiled / optimized / DLL files
+*.so
+# Node
+node_modules/
