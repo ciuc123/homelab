@@ -134,6 +134,9 @@ def main():
 
     if not subdomain.endswith(cf_zone_name):
         die(f'Subdomain {subdomain} is not in zone {cf_zone_name}')
+    # Disallow apex/root being used as a 'subdomain'
+    if subdomain.rstrip('.') == cf_zone_name.rstrip('.') or subdomain == cf_zone_name:
+        die(f'Subdomain {subdomain} is the zone apex; only subdomains are allowed. Provide e.g. blog.{cf_zone_name}')
 
     print('Verifying Cloudflare zone...')
     zone = cf_get_zone(cf_token, cf_zone_id)
