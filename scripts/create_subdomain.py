@@ -93,7 +93,12 @@ def gh_set_repo_public(gh_pat, owner, repo):
 def gh_create_file(gh_pat, owner, repo, path, content, message='Add file', branch='main'):
     url = f'{GH_API}/repos/{owner}/{repo}/contents/{path}'
     b64 = base64.b64encode(content.encode('utf-8')).decode('utf-8')
-    r = gh_request(gh_pat, 'PUT', url, json={'message': message, 'content': b64, 'branch': branch})
+    payload = {'message': message, 'content': b64, 'branch': branch}
+    # If the file already exists (e.g. README.md from auto_init), include its sha to update it
+    existing = gh_request(gh_pat, 'GET', url)
+    if existing.status_code == 200:
+        payload['sha'] = existing.json()['sha']
+    r = gh_request(gh_pat, 'PUT', url, json=payload)
     if r.status_code not in (200, 201):
         die(f'Failed creating file {path}: {r.status_code} {r.text}')
     return r.json()
