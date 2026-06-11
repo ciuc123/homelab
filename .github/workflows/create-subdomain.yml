@@ -4,33 +4,45 @@ on:
   issues:
     types: [opened]
 
-permissions:
-  contents: write
-  pages: write
-  issues: write
-
+# Only the repo owner can trigger resource creation
+# Any issue opened by someone else is silently skipped
 jobs:
   create-subdomain:
     runs-on: ubuntu-latest
+    if: github.event.issue.user.login == github.repository_owner
+
+    permissions:
+      contents: write
+      issues: write
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-      - name: Install deps
+
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r scripts/requirements.txt
-      - name: Run create subdomain script
+
+      - name: Create subdomain
+        # Issue title/body are passed via env vars, NOT interpolated directly
+        # into the shell script, to prevent shell injection attacks.
         env:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
           CF_ZONE_NAME: ${{ secrets.CF_ZONE_NAME }}
           GH_PAT: ${{ secrets.GH_PAT }}
+          GH_OWNER: ${{ secrets.GH_OWNER }}
           TEMPLATE_OWNER: ${{ secrets.TEMPLATE_OWNER }}
           TEMPLATE_REPO: ${{ secrets.TEMPLATE_REPO }}
-          GH_OWNER: ${{ secrets.GH_OWNER }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           ISSUE_REPO: ${{ github.repository }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
-          python scripts/create_subdomain.py --issue-title "${{ github.event.issue.title }}" --issue-body "${{ github.event.issue.body }}"
+          python scripts/create_subdomain.py \
+            --issue-title "$ISSUE_TITLE" \
+            --issue-body "$ISSUE_BODY"
