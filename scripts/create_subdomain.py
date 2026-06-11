@@ -275,7 +275,9 @@ def main():
     # ── Create Cloudflare DNS CNAME ──────────────────────────────────────────
     target = f'{gh_owner}.github.io'
     print(f'Creating DNS CNAME {subdomain} → {target}...')
-    cf_create_dns(cf_token, cf_zone_id, subdomain, 'CNAME', target, ttl=120, proxied=False)
+    # Enable Cloudflare proxy to hide origin IP and apply Cloudflare protections.
+    # Note: proxied CNAMEs may affect GitHub Pages certificate issuance; monitor site HTTPS after enabling.
+    cf_create_dns(cf_token, cf_zone_id, subdomain, 'CNAME', target, ttl=120, proxied=True)
 
     # ── Wait for DNS propagation ─────────────────────────────────────────────
     print('Waiting for DNS propagation (up to 5 minutes)...')
