@@ -1,0 +1,55 @@
+name: Create subdomain (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      subdomain:
+        description: 'Full subdomain to create (e.g. blog.example.com)'
+        required: true
+      repo_name:
+        description: 'Optional repository name to create (defaults from subdomain)'
+        required: false
+        default: ''
+      issue_body:
+        description: 'Optional free-form issue body (key: value lines)'
+        required: false
+        default: ''
+      template_repo:
+        description: 'Optional template repository name to generate from (name only)'
+        required: false
+        default: ''
+
+jobs:
+  create:
+    name: Create subdomain site
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install requirements
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run create_subdomain script
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
+          CF_ZONE_NAME: ${{ secrets.CF_ZONE_NAME }}
+          GH_PAT: ${{ secrets.GH_PAT }}
+          GH_OWNER: ${{ secrets.GH_OWNER }}
+          TEMPLATE_OWNER: ${{ secrets.TEMPLATE_OWNER }}
+        run: |
+          echo "Invoking create_subdomain.py with subdomain='${{ inputs.subdomain }}' repo_name='${{ inputs.repo_name }}'"
+          python scripts/create_subdomain.py --subdomain "${{ inputs.subdomain }}" --repo-name "${{ inputs.repo_name }}" --issue-body "${{ inputs.issue_body }}"
+

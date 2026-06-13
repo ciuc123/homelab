@@ -8,3 +8,4 @@ __pycache__/
 *.so
 # Node
 node_modules/
+.idea

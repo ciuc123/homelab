@@ -25,6 +25,8 @@ GitHub Actions
 
 Issue body format
 -----------------
+Use the GitHub issue template **Create subdomain site** to open a pre-filled issue that matches the parser.
+
 Include at least:
 
 subdomain: blog.ciuculescu.com
