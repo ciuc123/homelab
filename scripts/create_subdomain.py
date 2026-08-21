@@ -19,8 +19,11 @@ def parse_issue_text(text):
     if not text:
         return data
     for line in text.splitlines():
-        if ':' in line:
-            k, v = line.split(':', 1)
+        stripped = line.strip()
+        if stripped.startswith('#'):
+            continue
+        if ':' in stripped:
+            k, v = stripped.split(':', 1)
             data[k.strip().lower()] = v.strip()
     return data
 
@@ -53,7 +56,13 @@ def gh_request(gh_pat, method, url, **kwargs):
 def gh_get_authenticated_user(gh_pat):
     r = gh_request(gh_pat, 'GET', f'{GH_API}/user')
     if r.status_code != 200:
-        die(f'Failed to get authenticated user: {r.status_code} {r.text}')
+        die(
+            f'Failed to get authenticated user: {r.status_code} {r.text}\n'
+            'Hint: GH_PAT must be a classic Personal Access Token (or a fine-grained token) with '
+            '"repo" scope. The built-in GITHUB_TOKEN (github.token) cannot create repositories '
+            'and must not be used as GH_PAT. Create a new PAT at '
+            'https://github.com/settings/tokens and store it as the GH_PAT repository secret.'
+        )
     return r.json().get('login')
 
 def gh_repo_exists(gh_pat, owner, repo):
@@ -214,6 +223,15 @@ def main():
     if not all([cf_token, cf_zone_id, cf_zone_name, gh_pat, gh_owner]):
         die('Missing required env vars: CF_API_TOKEN, CF_ZONE_ID, CF_ZONE_NAME, GH_PAT, GH_OWNER')
 
+    # Warn early if GH_PAT looks like a built-in GITHUB_TOKEN (prefix ghs_).
+    # The built-in token cannot create repositories; a classic or fine-grained PAT is required.
+    if gh_pat.startswith('ghs_'):
+        die(
+            'GH_PAT appears to be the built-in GITHUB_TOKEN (prefix ghs_), which cannot create '
+            'repositories. Set the GH_PAT repository secret to a classic Personal Access Token '
+            '(or fine-grained token) with "repo" scope. '
+            'Create one at https://github.com/settings/tokens'
+        )
     # Parse issue body (passed via env var in CI to avoid shell injection)
     params = parse_issue_text(args.issue_body)
     subdomain  = args.subdomain  or params.get('subdomain') or params.get('domain')
