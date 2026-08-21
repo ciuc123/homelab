@@ -46,8 +46,8 @@ jobs:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
           CF_ZONE_NAME: ${{ secrets.CF_ZONE_NAME }}
-          GH_PAT: ${{ secrets.GH_PAT }}
-          GH_OWNER: ${{ secrets.GH_OWNER }}
+          GH_PAT: ${{ secrets.GH_PAT || github.token }}
+          GH_OWNER: ${{ secrets.GH_OWNER || github.repository_owner }}
           TEMPLATE_OWNER: ${{ secrets.TEMPLATE_OWNER }}
         run: |
           echo "Invoking create_subdomain.py with subdomain='${{ inputs.subdomain }}' repo_name='${{ inputs.repo_name }}'"
