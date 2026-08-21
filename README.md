@@ -42,6 +42,27 @@ Required repository secrets (set under GitHub repo → Settings → Secrets and 
 - CF_ZONE_ID: Cloudflare Zone ID for your domain (Dashboard → Overview).
 - CF_ZONE_NAME: Zone name (e.g. ciuculescu.com).
 - GH_PAT: GitHub Personal Access Token with repo scope (and org permissions if creating repos in an organization).
+
+  How to create the GH_PAT (classic token):
+
+  1. Go to https://github.com/settings/tokens (GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)).
+  2. Click "Generate new token" → "Generate new token (classic)".
+  3. Give it a descriptive name, e.g. "homelab-create-subdomain".
+  4. Set an expiration (90 days recommended; remember to rotate before it expires).
+  5. Under "Select scopes", tick:
+     - repo (full control of private repositories) — required to create repos and enable Pages.
+     - If you will create repos inside a GitHub Organization, also tick: read:org.
+  6. Click "Generate token" and copy the value immediately (it is shown only once).
+  7. In this repository go to Settings → Secrets and variables → Actions → New repository secret.
+  8. Name: GH_PAT  Value: <paste the token>
+  9. Click "Add secret".
+
+  Note: Fine-grained tokens can also be used. Under "Repository permissions" grant:
+  - Contents: Read and write
+  - Pages: Read and write
+  - Administration: Read and write (required to create/delete repositories)
+  - Metadata: Read-only (auto-selected)
+  Fine-grained tokens are scoped to specific repos or all repos owned by your account/org.
 - GH_OWNER: GitHub user or organization that will own created repositories.
 
 Optional:
