@@ -68,7 +68,10 @@ def gh_create_repo_from_template(gh_pat, template_owner, template_repo, owner, n
                    headers={'Accept': 'application/vnd.github.baptiste-preview+json'})
     if r.status_code in (201, 202):
         return r.json()
-    return None  # caller falls back to minimal site
+    die(
+        f'Failed to generate {owner}/{name} from template '
+        f'{template_owner}/{template_repo}: {r.status_code} {r.text}'
+    )
 
 def gh_create_repo(gh_pat, owner, repo, private=False, description=''):
     # auto_init=True creates the default branch so the Contents API works immediately
@@ -144,6 +147,24 @@ def find_available_repo_name(gh_pat, owner, base):
         candidate = f'{base}-{suffix}'
     die('Unable to find an available repo name after 99 attempts')
 
+def split_template_reference(reference, default_owner):
+    """Return the template owner and repository from a name or owner/name."""
+    reference = reference.strip().strip('/')
+    if not reference:
+        return '', ''
+    if '/' in reference:
+        owner, repo = reference.split('/', 1)
+        if not owner or not repo or '/' in repo:
+            die('Template must be a repository name or an owner/repository pair')
+        return owner, repo
+    if not default_owner:
+        die('TEMPLATE_OWNER is required when template is given as a repository name')
+    return default_owner, reference
+
+def resolve_template_reference(issue_template, configured_template, configured_owner):
+    """Resolve a request, preferring an explicitly requested issue template."""
+    return split_template_reference(issue_template or configured_template, configured_owner)
+
 def create_minimal_site(gh_pat, owner, repo, subdomain, branch='main'):
     index_html = (
         f'<html><head><meta charset="utf-8"><title>{subdomain}</title></head>'
@@ -206,7 +227,7 @@ def main():
     cf_zone_name   = get_env('CF_ZONE_NAME')
     gh_pat         = get_env('GH_PAT')
     gh_owner       = get_env('GH_OWNER')
-    template_repo  = get_env('TEMPLATE_REPO') or ''   # optional
+    template_repo  = get_env('TEMPLATE_REPO') or ''   # optional default
     template_owner = get_env('TEMPLATE_OWNER') or get_env('GITHUB_ACTOR') or ''
     issue_number   = get_env('ISSUE_NUMBER')
     issue_repo     = get_env('ISSUE_REPO')
@@ -218,9 +239,11 @@ def main():
     params = parse_issue_text(args.issue_body)
     subdomain  = args.subdomain  or params.get('subdomain') or params.get('domain')
     repo_name  = args.repo_name  or params.get('repo')      or params.get('repo_name') or params.get('repository')
+    # An issue explicitly requesting a template must override the workflow default.
+    # This lets one workflow provision several kinds of sites safely.
     tmpl_issue = params.get('template')
-    if tmpl_issue and not template_repo:
-        template_repo = tmpl_issue
+    template_owner, template_repo = resolve_template_reference(
+        tmpl_issue, template_repo, template_owner)
 
     if not subdomain:
         die('Missing subdomain. Add to issue body: subdomain: blog.ciuculescu.com')
@@ -241,19 +264,16 @@ def main():
 
     # ── Create GitHub repo ───────────────────────────────────────────────────
     created_repo = None
-    chosen_repo_name = repo_name
+    chosen_repo_name = find_available_repo_name(gh_pat, gh_owner, repo_name)
+    if chosen_repo_name != repo_name:
+        print(f'Repo {repo_name!r} already exists; using {chosen_repo_name!r} instead.')
 
     if template_repo:
-        print(f'Generating repo from template {template_owner}/{template_repo} → {gh_owner}/{repo_name}...')
+        print(f'Generating repo from template {template_owner}/{template_repo} → {gh_owner}/{chosen_repo_name}...')
         created_repo = gh_create_repo_from_template(
-            gh_pat, template_owner, template_repo, gh_owner, repo_name, private=False)
-        if not created_repo:
-            print('Template not found or generation failed; falling back to minimal site.')
+            gh_pat, template_owner, template_repo, gh_owner, chosen_repo_name, private=False)
 
     if not created_repo:
-        chosen_repo_name = find_available_repo_name(gh_pat, gh_owner, repo_name)
-        if chosen_repo_name != repo_name:
-            print(f'Repo {repo_name!r} already exists; using {chosen_repo_name!r} instead.')
         print(f'Creating repository {gh_owner}/{chosen_repo_name}...')
         created_repo = gh_create_repo(gh_pat, gh_owner, chosen_repo_name, private=False,
                                       description=f'Auto-generated site for {subdomain}')

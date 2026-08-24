@@ -39,7 +39,7 @@ jobs:
       - name: Install requirements
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install -r scripts/requirements.txt
 
       - name: Run create_subdomain script
         env:
@@ -48,7 +48,8 @@ jobs:
           CF_ZONE_NAME: ${{ secrets.CF_ZONE_NAME }}
           GH_PAT: ${{ secrets.GH_PAT || github.token }}
           GH_OWNER: ${{ secrets.GH_OWNER || github.repository_owner }}
-          TEMPLATE_OWNER: ${{ secrets.TEMPLATE_OWNER }}
+          TEMPLATE_OWNER: ${{ secrets.TEMPLATE_OWNER || github.repository_owner }}
+          TEMPLATE_REPO: ${{ inputs.template_repo || secrets.TEMPLATE_REPO }}
         run: |
           echo "Invoking create_subdomain.py with subdomain='${{ inputs.subdomain }}' repo_name='${{ inputs.repo_name }}'"
           python scripts/create_subdomain.py --subdomain "${{ inputs.subdomain }}" --repo-name "${{ inputs.repo_name }}" --issue-body "${{ inputs.issue_body }}"

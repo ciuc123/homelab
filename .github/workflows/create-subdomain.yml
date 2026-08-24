@@ -36,7 +36,7 @@ jobs:
           CF_ZONE_NAME: ${{ secrets.CF_ZONE_NAME }}
           GH_PAT: ${{ secrets.GH_PAT || github.token }}
           GH_OWNER: ${{ secrets.GH_OWNER || github.repository_owner }}
-          TEMPLATE_OWNER: ${{ secrets.TEMPLATE_OWNER }}
+          TEMPLATE_OWNER: ${{ secrets.TEMPLATE_OWNER || github.repository_owner }}
           TEMPLATE_REPO: ${{ secrets.TEMPLATE_REPO }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           ISSUE_REPO: ${{ github.repository }}
