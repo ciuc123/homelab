@@ -32,7 +32,8 @@ Include at least:
 subdomain: blog.ciuculescu.com
 repo: my-blog
 
-Optional: template: <template_repo_name>
+Optional: template: <template_repo_name> (or <owner>/<template_repo_name>). This
+value takes precedence over the `TEMPLATE_REPO` default.
 
 Environment and Secrets
 -----------------------
@@ -45,7 +46,10 @@ Required repository secrets (set under GitHub repo → Settings → Secrets and 
 - GH_OWNER: GitHub user or organization that will own created repositories.
 
 Optional:
-- TEMPLATE_REPO, TEMPLATE_OWNER — when provided, the script attempts to generate the new repo from that template; otherwise a minimal site is scaffolded.
+- TEMPLATE_REPO, TEMPLATE_OWNER — optional default template. An issue's `template:`
+  value overrides this default. The source repository must have GitHub's **Template
+  repository** setting enabled; a template-generation error stops the workflow
+  rather than creating an unintended minimal site.
 
 Local .env
 ----------
