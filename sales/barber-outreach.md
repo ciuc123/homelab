@@ -10,26 +10,46 @@ Record: Instagram handle, booking URL, area, rating/review count, four main serv
 
 ## Script
 
-1. Hey, I saw you liked my post and checked out your Fresha page, pretty cool stuff! Are you mainly growing through Instagram right now?
-2. Gotcha. Is not having a website intentional, or just something you haven't gotten around to yet?
-3. Nice. Do you feel like you're getting most of your bookings directly through Instagram/Fresha, or do people usually find you through Google too?
-4. Gotcha. Is not having a website intentional, or just something you haven't gotten around to yet?
-5. Yeah, makes sense. If you did have one, what would you actually want it to do for you — mostly bring in new clients, make you look more established, take bookings, something else?
-6. Got it. That's actually something I could help with. I build this kind of stuff — would you be open to me showing you what I'd do with it?
+1. Hey, I saw you liked my post and checked out your Fresha page — pretty cool stuff! Are you mainly growing through Instagram right now?
+2. Gotcha. Do you feel like you're getting most of your bookings directly through Instagram/Fresha, or do people usually find you through Google too?
+3. Got it. Is not having a website intentional, or just something you haven't gotten around to yet?
+4. Yeah, makes sense. If you did have one, what would you actually want it to do for you — mostly bring in new clients, make you look more established, take bookings, something else?
+5. Got it. That's actually something I could help with. I build this kind of stuff — would you be open to me showing you what I'd do with it?
 
 ## Objection replies
 
-**“I already have Fresha.”**
+### "I'm happy with Instagram/Fresha"
+Makes sense. If it's working, no reason to change it. Do you ever feel like you're missing people who find businesses through Google though?
 
-> Keep it. Fresha runs availability and payments. This gives your Instagram and Google traffic a page that sells *you*, then sends the ready-to-book client into Fresha.
+### "I don't need a website"
+Totally fair. What do you feel a website would need to do for it to actually be worth having?
 
-**“It is expensive.”**
+### "I haven't gotten around to it"
+Yeah, that's usually what I hear 😄 What would you want it to actually help with if you did get one?
 
-> Totally fair. At [their average service price], it is roughly [12–15] additional appointments to cover the one-off cost. If your priority is simply managing existing bookings, Fresha is enough; this is for owning the first impression and bringing in better-fit new clients.
+### "I already have enough clients"
+That's a good problem to have. In that case, would you even want more clients, or would the value be more around making things easier / reducing admin?
 
-**“I need to think about it.”**
+### "How much?"
+Depends on what you'd actually want it to do. I don't want to quote you for something you don't need. If you want, I can take a look at what you're doing and show you what I'd build first.
 
-> No pressure. Is the hesitation the price, timing, or whether a site would actually be useful? If I know which, I can give you a straight answer rather than chase you.
+### "I'm not interested"
+No worries at all. Out of curiosity, is it because you don't see a need for a website, or just not a priority right now?
+
+### "I already have a website"
+Ah, nice — I must have missed it. What do you use it for mainly?
+
+### "Can you send me your portfolio?"
+Sure. Before I do, what kind of site were you thinking about? I can send you something actually relevant rather than a random portfolio dump.
+
+### "I already have Fresha"
+Keep it. Fresha runs availability and payments. This gives your Instagram and Google traffic a page that sells *you*, then sends the ready-to-book client into Fresha.
+
+### "It is expensive."
+Totally fair. At [their average service price], it is roughly [12–15] additional appointments to cover the one-off cost. If your priority is simply managing existing bookings, Fresha is enough; this is for owning the first impression and bringing in better-fit new clients.
+
+### "I need to think about it"
+No pressure. Is the hesitation the price, timing, or whether a site would actually be useful? If I know which, I can give you a straight answer rather than chase you.
 
 ## Follow-ups
 
