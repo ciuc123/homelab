@@ -52,7 +52,7 @@ class SplitTemplateReferenceTests(unittest.TestCase):
     def test_waits_for_template_default_branch_ref(self, request, _sleep):
         request.side_effect = [
             FakeResponse(200, {'default_branch': 'main'}),
-            FakeResponse(404),
+            FakeResponse(409, text='Git Repository is empty'),
             FakeResponse(200, {'default_branch': 'main'}),
             FakeResponse(200),
         ]

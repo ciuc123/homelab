@@ -107,7 +107,10 @@ def gh_wait_for_default_branch(gh_pat, owner, repo, attempts=20, wait=3):
                 gh_pat, 'GET', f'{repo_url}/git/ref/heads/{branch}')
             if ref_response.status_code == 200:
                 return branch
-            if ref_response.status_code != 404:
+            # Template generation returns before its first commit is copied. In
+            # that brief interval GitHub reports either 404 (no ref yet) or 409
+            # (the Git repository is still empty).
+            if ref_response.status_code not in (404, 409):
                 die(f'Failed checking default branch {branch!r}: '
                     f'{ref_response.status_code} {ref_response.text}')
         time.sleep(wait)
