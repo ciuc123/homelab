@@ -93,6 +93,26 @@ def gh_set_repo_public(gh_pat, owner, repo):
         die(f'Failed to set repo public: {r.status_code} {r.text}')
     return r.json()
 
+def gh_wait_for_default_branch(gh_pat, owner, repo, attempts=20, wait=3):
+    """Wait until GitHub has finished creating a repository's default branch."""
+    repo_url = f'{GH_API}/repos/{owner}/{repo}'
+    for _ in range(attempts):
+        repo_response = gh_request(gh_pat, 'GET', repo_url)
+        if repo_response.status_code != 200:
+            die(f'Failed getting repository {owner}/{repo}: '
+                f'{repo_response.status_code} {repo_response.text}')
+        branch = repo_response.json().get('default_branch')
+        if branch:
+            ref_response = gh_request(
+                gh_pat, 'GET', f'{repo_url}/git/ref/heads/{branch}')
+            if ref_response.status_code == 200:
+                return branch
+            if ref_response.status_code != 404:
+                die(f'Failed checking default branch {branch!r}: '
+                    f'{ref_response.status_code} {ref_response.text}')
+        time.sleep(wait)
+    die(f'Default branch for {owner}/{repo} was not ready after {attempts * wait} seconds')
+
 def gh_create_file(gh_pat, owner, repo, path, content, message='Add file', branch='main'):
     url = f'{GH_API}/repos/{owner}/{repo}/contents/{path}'
     b64 = base64.b64encode(content.encode('utf-8')).decode('utf-8')
@@ -277,17 +297,22 @@ def main():
         print(f'Creating repository {gh_owner}/{chosen_repo_name}...')
         created_repo = gh_create_repo(gh_pat, gh_owner, chosen_repo_name, private=False,
                                       description=f'Auto-generated site for {subdomain}')
+        site_branch = gh_wait_for_default_branch(gh_pat, gh_owner, chosen_repo_name)
         print('Scaffolding minimal site...')
         try:
-            create_minimal_site(gh_pat, gh_owner, chosen_repo_name, subdomain, branch='main')
+            create_minimal_site(gh_pat, gh_owner, chosen_repo_name, subdomain, branch=site_branch)
         except Exception as e:
             die(f'Failed to scaffold site files: {e}')
+    else:
+        # Template generation is asynchronous: the repository may be returned
+        # before its default branch and first commit are available to Pages.
+        site_branch = gh_wait_for_default_branch(gh_pat, gh_owner, chosen_repo_name)
 
     gh_set_repo_public(gh_pat, gh_owner, chosen_repo_name)
 
     # ── Enable GitHub Pages ──────────────────────────────────────────────────
     print('Enabling GitHub Pages...')
-    gh_enable_pages(gh_pat, gh_owner, chosen_repo_name, branch='main')
+    gh_enable_pages(gh_pat, gh_owner, chosen_repo_name, branch=site_branch)
 
     print(f'Setting custom domain {subdomain!r} on Pages...')
     gh_set_pages_cname(gh_pat, gh_owner, chosen_repo_name, subdomain)
