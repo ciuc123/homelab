@@ -9,13 +9,13 @@
   "neon_project_id": "vercel-marketplace:template",
   "repo": "ciuc123/template",
   "steps": {
-    "clerk": "manual: see checklist below",
+    "clerk": "manual: CLERK_PLATFORM_API_KEY is not set, so no Clerk application was created (checklist below)",
     "deploy": "deployment dpl_9zWDfU22fwDiHW8sFW51eSPALnP5 started",
     "dns": "created: template.ciuculescu.com -> bdbe3583a794ed87.vercel-dns-017.com (DNS-only)",
     "domain": "added; verified=True; CNAME target bdbe3583a794ed87.vercel-dns-017.com",
     "github": "existing; NPM_TOKEN secret set",
     "migrate": "app-core and site migrations applied",
-    "neon": "created Neon database via the Vercel Marketplace in fra1",
+    "neon": "existing Neon database via the Vercel Marketplace in fra1",
     "proxy": "left DNS-only (proxy_after_verify is false)",
     "vercel": "existing project prj_yTpJtO14MofCTRiYB2VwjcPtQPsE; env set: SITE_NAME, APP_URL, APP_ADMIN_EMAILS, APP_OWNER_EMAIL, EVENT_LINK_SECRET, NPM_TOKEN",
     "verify": "Vercel reports the domain verified and configured"
