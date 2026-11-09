@@ -1,0 +1,102 @@
+name: Provision client site
+
+# Runs infra-template: GitHub repo from the template, Neon database, Vercel project, Cloudflare DNS, then writes the
+# client's record to clients/<name>.json. Only the repository owner can start it (an issue by anyone else is skipped).
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch:
+    inputs:
+      spec:
+        description: "client.json content (see infra-template README)"
+        required: true
+      dry_run:
+        description: "Print the plan, create nothing"
+        type: boolean
+        default: true
+
+concurrency:
+  group: provision-client
+  cancel-in-progress: false
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: github.event_name == 'workflow_dispatch' || (github.event.issue.user.login == github.repository_owner && contains(github.event.issue.labels.*.name, 'new-client'))
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/infra-template
+          token: ${{ secrets.GH_PAT }}
+          path: infra
+
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+
+      - name: Build the client spec
+        id: spec
+        # The issue body and the dispatch input are untrusted text: they reach the script through env vars only.
+        env:
+          EVENT: ${{ github.event_name }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          DISPATCH_SPEC: ${{ inputs.spec }}
+          DISPATCH_DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            printf '%s' "$DISPATCH_SPEC" > spec.json
+            echo "mode=$([ "$DISPATCH_DRY_RUN" = "true" ] && echo dry-run || echo real-run)" >> "$GITHUB_OUTPUT"
+          else
+            printf '%s' "$ISSUE_BODY" | python scripts/issue_to_spec.py spec.json > mode.txt
+            echo "mode=$(cat mode.txt)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Provision
+        env:
+          MODE: ${{ steps.spec.outputs.mode }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
+          CF_ZONE_NAME: ${{ secrets.CF_ZONE_NAME }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          flag=""
+          [ "$MODE" = "dry-run" ] && flag="--dry-run"
+          cd infra
+          set -o pipefail
+          python -m infra provision ../spec.json --registry ../clients $flag 2>&1 | tee ../provision.log
+
+      - name: Save the client record
+        if: always() && steps.spec.outputs.mode == 'real-run'
+        run: |
+          git config user.name "homelab-bot"
+          git config user.email "homelab-bot@users.noreply.github.com"
+          git add clients
+          git diff --cached --quiet || (git commit -m "Client record from provisioning run ${{ github.run_id }}" && git push)
+
+      - name: Report on the issue
+        if: always() && github.event_name == 'issues'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STATUS: ${{ job.status }}
+          MODE: ${{ steps.spec.outputs.mode }}
+        run: |
+          {
+            echo "Provisioning ($MODE): **$STATUS**  ·  [run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+            echo
+            echo '```'
+            tail -n 60 provision.log 2>/dev/null || echo "no log"
+            echo '```'
+          } > comment.md
+          gh issue comment ${{ github.event.issue.number }} --body-file comment.md

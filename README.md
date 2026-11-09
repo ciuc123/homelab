@@ -1,70 +1,29 @@
-Create Subdomain Workflow
-=========================
+# homelab
 
-Overview
---------
-This project provides an automated GitHub Actions workflow and a helper script (scripts/create_subdomain.py) that creates a GitHub repository and configures a custom subdomain on GitHub Pages using Cloudflare DNS. It accepts a new GitHub Issue in a repository and, when the issue body requests a subdomain, it:
+Control plane for client sites. It holds the issue form, the workflow, the secrets and the client registry. The provisioning code lives in the private repo `infra-template`; this repo only calls it.
 
-- Validates the requested subdomain (only subdomains of the configured zone are allowed; apex domain is rejected).
-- Creates a repo (from a template if provided, otherwise scaffolds a minimal static site).
-- Publishes the repo as public and enables GitHub Pages.
-- Adds a custom domain to Pages and creates the CNAME DNS record in Cloudflare.
-- Waits for DNS propagation and for GitHub Pages to verify the domain, then comments on the issue with the URLs.
+## Start a client
 
-Usage
------
-Local testing (use .env to provide credentials):
+1. Open an issue with the **New client site** form (client name, subdomain, template, toggles, owner email). Tick **Dry run** first: the workflow comments the plan and creates nothing.
+2. Open it again without Dry run. The workflow (`.github/workflows/provision-client.yml`) runs `python -m infra provision`: GitHub repo from the template, Neon database, Vercel project and env vars, Cloudflare DNS (DNS-only until Vercel verifies it), migrations, first deploy. It comments the log on the issue and commits `clients/<name>.json`.
+3. Do the Clerk checklist printed at the end (Clerk application creation is manual).
 
-1. Copy .env.example to .env and fill values (do NOT commit .env).
-2. Run:
-   python scripts/create_subdomain.py --issue-body "subdomain: blog.ciuculescu.com\nrepo: my-blog"
+Without an issue: Actions -> Provision client site -> Run workflow, paste a `client.json`.
 
-GitHub Actions
---------------
-- Create an issue in the repo following the issue format (see below). The workflow triggers on new issues.
+Only issues opened by the repository owner run anything.
 
-Issue body format
------------------
-Use the GitHub issue template **Create subdomain site** to open a pre-filled issue that matches the parser.
+## Secrets (Settings -> Secrets and variables -> Actions)
 
-Include at least:
+See `.env.example`: `CF_API_TOKEN`, `CF_ZONE_ID`, `CF_ZONE_NAME`, `VERCEL_TOKEN`, `VERCEL_TEAM_ID` (optional), `NEON_API_KEY`, `GH_PAT`, `NPM_TOKEN`.
 
-subdomain: blog.ciuculescu.com
-repo: my-blog
+## Layout
 
-Optional: template: <template_repo_name> (or <owner>/<template_repo_name>). This
-value takes precedence over the `TEMPLATE_REPO` default.
+| Path | What |
+|---|---|
+| `.github/ISSUE_TEMPLATE/new-client.yml` | the issue form |
+| `.github/workflows/provision-client.yml` | issue/dispatch -> infra-template |
+| `scripts/issue_to_spec.py` | issue form body -> `client.json` (tested in `tests/`) |
+| `clients/` | the registry, one file per client |
+| `sales/` | sales material, moving to the `pfa` repo (Phase 5) |
 
-Environment and Secrets
------------------------
-Required repository secrets (set under GitHub repo → Settings → Secrets and variables → Actions):
-
-- CF_API_TOKEN: Cloudflare API token with DNS edit permissions. Create in Cloudflare Dashboard → My Profile → API Tokens; use the "Edit zone DNS" template or grant Zone.Zone (read) + Zone.DNS (edit).
-- CF_ZONE_ID: Cloudflare Zone ID for your domain (Dashboard → Overview).
-- CF_ZONE_NAME: Zone name (e.g. ciuculescu.com).
-- GH_PAT: GitHub Personal Access Token with repo scope (and org permissions if creating repos in an organization).
-- GH_OWNER: GitHub user or organization that will own created repositories.
-
-Optional:
-- TEMPLATE_REPO, TEMPLATE_OWNER — optional default template. An issue's `template:`
-  value overrides this default. The source repository must have GitHub's **Template
-  repository** setting enabled; a template-generation error stops the workflow
-  rather than creating an unintended minimal site.
-
-Local .env
-----------
-For convenience the script loads .env (project root) first and uses values there before falling back to environment variables. Use .env only for local testing; it is added to .gitignore.
-
-Security notes
---------------
-- Never commit real secrets to the repository. Use GitHub Secrets for CI.
-- The script will only create subdomains under the configured CF_ZONE_NAME; it will reject the apex domain.
-
-Troubleshooting
----------------
-- If GitHub does not verify the domain immediately, the workflow reports a warning; certificate issuance can take several minutes.
-- If DNS propagation times out, check Cloudflare DNS record settings and that CF_API_TOKEN has correct permissions.
-
-Contact
--------
-For changes or improvements, open an issue or a PR in this repository.
+The old GitHub Pages subdomain script was removed: it could not host this stack, and its DNS wait timed out because it created the CNAME proxied (see infra-template README).

@@ -1,0 +1,60 @@
+name: New client site
+description: Provision a client site from a template (GitHub repo, Neon database, Vercel project, DNS)
+title: "New client: <name>"
+labels: [new-client]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Opening this issue starts provisioning (only for the repository owner). Tick **Dry run** first to see the plan without creating anything.
+  - type: input
+    id: name
+    attributes:
+      label: Client name
+      description: Lowercase letters, digits and hyphens. Becomes the repo, Vercel project and Neon project name.
+      placeholder: acme-shop
+    validations:
+      required: true
+  - type: input
+    id: domain
+    attributes:
+      label: Domain
+      description: A subdomain of the Cloudflare zone, for example shop.example.com
+    validations:
+      required: true
+  - type: input
+    id: site_name
+    attributes:
+      label: Site name
+      description: Shown on the site and in emails. Defaults to the client name.
+  - type: dropdown
+    id: template
+    attributes:
+      label: Frontend template
+      options:
+        - ciuc123/frontend-base
+    validations:
+      required: true
+  - type: checkboxes
+    id: toggles
+    attributes:
+      label: Site options (site.config toggles)
+      options:
+        - label: Owner dashboard (admin) enabled
+          required: false
+        - label: Visitor accounts (sign-in) enabled
+          required: false
+  - type: input
+    id: owner_email
+    attributes:
+      label: Owner email
+      description: This account becomes admin on first sign-up.
+  - type: checkboxes
+    id: options
+    attributes:
+      label: Run options
+      options:
+        - label: Dry run (print the plan, create nothing)
+          required: false
+        - label: Turn the Cloudflare proxy on after the domain is verified
+          required: false
