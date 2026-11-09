@@ -2,14 +2,23 @@
   "clerk": "manual: create the Clerk application and set its keys (see checklist)",
   "created_at": "2026-11-09T15:19:24+00:00",
   "dns_proxied": false,
-  "dns_record_id": "",
+  "dns_record_id": "d3a21877b70c5dd307c87dbb5660ae12",
   "domain": "template.ciuculescu.com",
   "name": "template",
-  "neon_project_id": "",
+  "neon_project_id": "vercel-marketplace:template",
   "repo": "ciuc123/template",
   "steps": {
-    "github": "existing; NPM_TOKEN secret set"
+    "clerk": "manual: see checklist below",
+    "deploy": "deployment dpl_9zWDfU22fwDiHW8sFW51eSPALnP5 started",
+    "dns": "created: template.ciuculescu.com -> bdbe3583a794ed87.vercel-dns-017.com (DNS-only)",
+    "domain": "added; verified=True; CNAME target bdbe3583a794ed87.vercel-dns-017.com",
+    "github": "existing; NPM_TOKEN secret set",
+    "migrate": "app-core and site migrations applied",
+    "neon": "created Neon database via the Vercel Marketplace in fra1",
+    "proxy": "left DNS-only (proxy_after_verify is false)",
+    "vercel": "created project prj_yTpJtO14MofCTRiYB2VwjcPtQPsE; env set: SITE_NAME, APP_URL, APP_OWNER_EMAIL, EVENT_LINK_SECRET, NPM_TOKEN",
+    "verify": "Vercel reports the domain verified and configured"
   },
   "template": "ciuc123/frontend-base",
-  "vercel_project_id": ""
+  "vercel_project_id": "prj_yTpJtO14MofCTRiYB2VwjcPtQPsE"
 }
