@@ -2,6 +2,8 @@
 
 Control plane for client sites. It holds the issue form, the workflow, the secrets and the client registry. The provisioning code lives in the private repo `infra-template`; this repo only calls it.
 
+New here? The step-by-step is in `infra-template/docs/QUICKSTART.md` (private repo).
+
 ## Start a client
 
 1. Open an issue with the **New client site** form (client name, subdomain, template, toggles, owner email). Tick **Dry run** first: the workflow comments the plan and creates nothing.
