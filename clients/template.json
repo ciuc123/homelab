@@ -1,5 +1,6 @@
 {
   "clerk": "manual: create the Clerk application and set its keys (see checklist)",
+  "clerk_app_id": "",
   "created_at": "2026-11-09T15:19:24+00:00",
   "dns_proxied": false,
   "dns_record_id": "d3a21877b70c5dd307c87dbb5660ae12",
@@ -16,7 +17,7 @@
     "migrate": "app-core and site migrations applied",
     "neon": "created Neon database via the Vercel Marketplace in fra1",
     "proxy": "left DNS-only (proxy_after_verify is false)",
-    "vercel": "created project prj_yTpJtO14MofCTRiYB2VwjcPtQPsE; env set: SITE_NAME, APP_URL, APP_OWNER_EMAIL, EVENT_LINK_SECRET, NPM_TOKEN",
+    "vercel": "existing project prj_yTpJtO14MofCTRiYB2VwjcPtQPsE; env set: SITE_NAME, APP_URL, APP_ADMIN_EMAILS, APP_OWNER_EMAIL, EVENT_LINK_SECRET, NPM_TOKEN",
     "verify": "Vercel reports the domain verified and configured"
   },
   "template": "ciuc123/frontend-base",
