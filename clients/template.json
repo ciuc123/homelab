@@ -10,7 +10,7 @@
   "repo": "ciuc123/template",
   "steps": {
     "clerk": "manual: CLERK_PLATFORM_API_KEY is not set, so no Clerk application was created (checklist below)",
-    "deploy": "deployment dpl_928VJbx8ZLVTE26U9kpwLfV6xWhV started",
+    "deploy": "deployment dpl_E2fGn2HsPiyfE7KTJB68kAbKVhFG started",
     "dns": "unchanged: template.ciuculescu.com -> bdbe3583a794ed87.vercel-dns-017.com (DNS-only)",
     "domain": "added; verified=True; CNAME target bdbe3583a794ed87.vercel-dns-017.com",
     "github": "existing; NPM_TOKEN secret set",
