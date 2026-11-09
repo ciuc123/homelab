@@ -51,6 +51,7 @@ def parse(body: str) -> tuple[dict, bool]:
         "admin_enabled": ticked(toggles, "Owner dashboard") if toggles else True,
         "accounts_enabled": ticked(toggles, "Visitor accounts") if toggles else True,
         "proxy_after_verify": ticked(options, "Cloudflare proxy"),
+        "dev_enabled": ticked(options, "Dev version"),
     }
     return {k: v for k, v in spec.items() if v != ""}, ticked(options, "Dry run")
 

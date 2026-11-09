@@ -58,3 +58,5 @@ body:
           required: false
         - label: Turn the Cloudflare proxy on after the domain is verified
           required: false
+        - label: Dev version (also provision dev.<domain>, served from the development branch)
+          required: false
