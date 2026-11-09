@@ -8,7 +8,7 @@
   "neon_project_id": "",
   "repo": "ciuc123/template",
   "steps": {
-    "github": "created; NPM_TOKEN secret set"
+    "github": "existing; NPM_TOKEN secret set"
   },
   "template": "ciuc123/frontend-base",
   "vercel_project_id": ""
