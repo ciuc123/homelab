@@ -24,6 +24,6 @@ See `.env.example`: `CF_API_TOKEN`, `CF_ZONE_ID`, `CF_ZONE_NAME`, `VERCEL_TOKEN`
 | `.github/workflows/provision-client.yml` | issue/dispatch -> infra-template |
 | `scripts/issue_to_spec.py` | issue form body -> `client.json` (tested in `tests/`) |
 | `clients/` | the registry, one file per client |
-| `sales/` | sales material, moving to the `pfa` repo (Phase 5) |
+| (sales material) | moved to the private `pfa` repo: `sales/` and `projects/client-sites/` |
 
 The old GitHub Pages subdomain script was removed: it could not host this stack, and its DNS wait timed out because it created the CNAME proxied (see infra-template README).
