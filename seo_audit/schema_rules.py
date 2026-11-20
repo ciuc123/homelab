@@ -67,6 +67,25 @@ def articles_without_author(raw_blocks):
     return len(arts), missing
 
 
+def faq_problems(raw_blocks):
+    """(number of FAQPage nodes, list of problems)."""
+    pages = [n for n in nodes(raw_blocks) if "FAQPage" in types(n)]
+    problems = []
+    for p in pages:
+        qs = p.get("mainEntity")
+        qs = qs if isinstance(qs, list) else [qs] if qs else []
+        if not qs:
+            problems.append("FAQPage without questions")
+        for i, q in enumerate(qs, 1):
+            ans = q.get("acceptedAnswer") if isinstance(q, dict) else None
+            if isinstance(ans, list):
+                ans = ans[0] if ans else None
+            if not (isinstance(q, dict) and "Question" in types(q) and str(q.get("name", "")).strip()
+                    and isinstance(ans, dict) and str(ans.get("text", "")).strip()):
+                problems.append("question %d needs name and acceptedAnswer.text" % i)
+    return len(pages), problems
+
+
 def robots_groups(text):
     """[(set of lowercased user-agents, [(directive, path)])], following the robots.txt grouping rules."""
     groups, agents, rules, last = [], [], [], None

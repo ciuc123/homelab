@@ -29,6 +29,12 @@ DATE_MATCHES_FILENAME = rule("date-matches-filename", ERROR, "Front matter date 
 NO_FUTURE_DATE = rule("no-future-date", ERROR, "Post date is not in the future")
 STALE_YEAR = rule("stale-year-in-title", ERROR, "Title doesn't name a year older than the post date")
 MIN_WORDS = rule("min-word-count", ERROR, "Post body has at least min_words words (code blocks excluded)")
+LAST_MODIFIED = rule("last-modified", ERROR, "last_modified_at, if set, is on or after the post date and not in the future")
+# Answer-first post standard: only for posts dated on/after config "standard_since"
+POST_TLDR = rule("post-tldr", ERROR, "Post has 3-5 key takeaways (tldr)")
+FAQ_ENTRIES = rule("faq-entries", ERROR, "Every FAQ entry has a question ending in ? and an answer of 20+ words")
+QUESTION_HEADING = rule("question-heading", ERROR, "Post has at least one heading phrased as a question")
+SOURCES_SECTION = rule("sources-section", ERROR, "Post ends with a Sources (or References) section")
 
 # Rendered pages
 SINGLE_TITLE = rule("single-title", ERROR, "Page has exactly one non-empty <title>")
@@ -42,6 +48,7 @@ OG_IMAGE = rule("og-image", ERROR, "Page has og:image")
 IMG_ALT = rule("img-alt", ERROR, "Every <img> has an alt attribute")
 INTERNAL_LINKS = rule("internal-links", ERROR, "Internal links point to pages that exist")
 POST_CTA = rule("post-cta", ERROR, "Every post has a call to action (.post-cta)")
+FAQ_SCHEMA = rule("faq-schema-valid", ERROR, "FAQPage JSON-LD has Questions, each with a name and an accepted answer")
 ARTICLE_AUTHOR = rule("article-author", ERROR, "Every Article/BlogPosting in JSON-LD has an author")
 FORM_ACTION = rule("form-action", ERROR, "Every <form> posts to a real endpoint (non-empty action)")
 

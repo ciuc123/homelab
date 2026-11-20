@@ -4,7 +4,7 @@ import re
 from urllib.parse import urljoin, urlsplit
 
 from . import model as m
-from .schema_rules import articles_without_author
+from .schema_rules import articles_without_author, faq_problems
 
 POST_URL = re.compile(r"^/posts/\d{4}-\d{2}-\d{2}-[^/]+/?$")
 SKIP_SCHEMES = ("mailto:", "tel:", "javascript:", "data:")
@@ -54,6 +54,10 @@ def check_page(results, path, page, site_origin, link_exists):
     results.check(m.JSON_LD_PRESENT, t, bool(page.jsonld), "no JSON-LD")
     if page.jsonld:
         results.check(m.JSON_LD_VALID, t, not bad, "; ".join(bad))
+
+    n_faq, faq_bad = faq_problems(page.jsonld)
+    if n_faq:
+        results.check(m.FAQ_SCHEMA, t, not faq_bad, "; ".join(faq_bad))
 
     n_articles, no_author = articles_without_author(page.jsonld)
     if n_articles:
