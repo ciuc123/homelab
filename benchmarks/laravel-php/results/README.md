@@ -42,7 +42,7 @@ GitHub Actions ubuntu-24.04, AMD EPYC 9V45, 4 vCPU, run [44803515937](https://gi
 
 ## 2026-11-20-laptop-i7-10750H
 
-Intel Core i7-10750H laptop, WSL2 + Docker Desktop, containers pinned to 2 cores.
+Intel Core i7-10750H laptop, WSL2 + Docker Desktop, containers pinned to 2 cores. Noisier than the runners (shared laptop). During this run the images were rebuilt once by `setup.sh` from the same code and the same seeded data.
 
 | Workload | PHP | Median ms | IQR ms | Samples | vs 8.3 |
 |---|---|---:|---:|---:|---:|
