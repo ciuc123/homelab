@@ -20,6 +20,14 @@ class FrontMatterTest(unittest.TestCase):
         self.assertEqual(d["desc"], "first line second line")
         self.assertEqual(d["after"], "x")
 
+    def test_list_of_mappings(self):
+        d = fm.parse('faq:\n  - q: "Why?"\n    a: "Because: reasons."\n  - q: Second?\n    a: plain answer\ntags: [x]\n')
+        self.assertEqual(d["faq"], [{"q": "Why?", "a": "Because: reasons."}, {"q": "Second?", "a": "plain answer"}])
+        self.assertEqual(d["tags"], ["x"])
+
+    def test_quoted_list_item_with_colon_stays_a_string(self):
+        self.assertEqual(fm.parse('tldr:\n  - "Note: this is a string"\n')["tldr"], ["Note: this is a string"])
+
     def test_literal_scalar_keeps_lines(self):
         self.assertEqual(fm.parse("body: |\n  a\n  b\n")["body"], "a\nb")
 

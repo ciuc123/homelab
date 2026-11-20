@@ -62,6 +62,48 @@ def lint_post(path, results, config, today):
     min_words = int(config.get("min_words", 300))
     results.check(m.MIN_WORDS, target, words >= min_words, "%d words (minimum %d)" % (words, min_words))
 
+    if fm.get("last_modified_at"):
+        try:
+            mod = _date(fm["last_modified_at"])
+            ok, msg = date <= mod <= today, "last_modified_at %s (post date %s)" % (mod, date)
+        except ValueError:
+            ok, msg = False, "last_modified_at isn't a date"
+        results.check(m.LAST_MODIFIED, target, ok, msg)
+
+    since = config.get("standard_since")
+    if since and date >= _date(since):
+        lint_standard(target, fm, body, results)
+
+
+_HEADING = re.compile(r"^#{2,3}\s+(.+?)\s*#*\s*$", re.M)
+
+
+def headings(body):
+    return [h.strip() for h in _HEADING.findall(_FENCE.sub(" ", body))]
+
+
+def lint_standard(target, fm, body, results):
+    """The answer-first post standard (content-pipeline.md): takeaways, FAQ, question headings, sources."""
+    tldr = fm.get("tldr")
+    n = len(tldr) if isinstance(tldr, list) else 0
+    results.check(m.POST_TLDR, target, 3 <= n <= 5 and all(str(x).strip() for x in tldr or []),
+                  "%d takeaways (need 3-5)" % n)
+
+    faq = fm.get("faq")
+    if faq:
+        bad = []
+        for i, entry in enumerate(faq if isinstance(faq, list) else [faq], 1):
+            q = str(entry.get("q", "")).strip() if isinstance(entry, dict) else ""
+            a = str(entry.get("a", "")).strip() if isinstance(entry, dict) else ""
+            if not q.endswith("?") or len(a.split()) < 20:
+                bad.append(str(i))
+        results.check(m.FAQ_ENTRIES, target, not bad, "entries %s need a question ending in ? and a 20+ word answer" % ", ".join(bad))
+
+    hs = headings(body)
+    results.check(m.QUESTION_HEADING, target, any(h.endswith("?") for h in hs), "no ## or ### heading ends with ?")
+    results.check(m.SOURCES_SECTION, target, any(h.lower().rstrip(":") in ("sources", "references") for h in hs),
+                  "no ## Sources section")
+
 
 def lint_content(posts_dir, results, config, today=None):
     today = today or dt.date.today()

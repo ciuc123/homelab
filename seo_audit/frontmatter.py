@@ -1,7 +1,8 @@
 """Minimal YAML front matter reader for Jekyll posts (stdlib has no YAML).
 
 Supports what posts use: `key: value`, quoted strings, integers, inline lists `[a, b]`,
-block lists (`- item`) and block scalars (`>`, `>-`, `|`, `|-`). Anything else is kept as the raw string.
+block lists (`- item`), lists of mappings (`- q: ...` / `  a: ...`) and block scalars (`>`, `>-`, `|`, `|-`).
+Anything else is kept as the raw string.
 """
 import re
 
@@ -78,8 +79,19 @@ def parse(fm_text):
         if stripped.startswith("- ") and current is not None:
             if not isinstance(data[current], list):
                 data[current] = []
-            data[current].append(_scalar(stripped[2:]))
+            item = stripped[2:]
+            km = _KEY.match(item)
+            if km and not item.startswith(("\"", "'")):
+                data[current].append({km.group(1): _scalar(km.group(2) or "")})
+            else:
+                data[current].append(_scalar(item))
             continue
+        if line[:1] in (" ", "\t") and current is not None and isinstance(data.get(current), list) \
+                and data[current] and isinstance(data[current][-1], dict):
+            km = _KEY.match(stripped)
+            if km:
+                data[current][-1][km.group(1)] = _scalar(km.group(2) or "")
+                continue
         m = _KEY.match(line)
         if not m:
             raise FrontMatterError("line %d: can't parse %r" % (n, line))

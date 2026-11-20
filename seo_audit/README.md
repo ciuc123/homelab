@@ -44,11 +44,17 @@ shows up in search, social and AI answers; 3 = polish. Within a tier, more failu
 | `no-future-date` | Post isn't dated in the future |
 | `stale-year-in-title` | Title doesn't name a year older than the post (versions like `2025.1` are fine) |
 | `min-word-count` | Body has ≥ `min_words` words, code excluded |
+| `last-modified` | `last_modified_at`, if set, is between the post date and today |
+| `post-tldr` | *Post standard:* 3–5 key takeaways in `tldr` |
+| `faq-entries` | *Post standard:* each `faq` entry is a question ending in `?` with a 20+ word answer |
+| `question-heading` | *Post standard:* at least one `##`/`###` heading phrased as a question |
+| `sources-section` | *Post standard:* a `## Sources` (or References) section |
 | `single-title` | Exactly one `<title>` |
 | `meta-description` / `meta-description-length` | Meta description present, 50–160 characters |
 | `canonical` | Absolute canonical URL |
 | `single-h1` | Exactly one `<h1>` |
 | `json-ld-present` / `json-ld-valid` | Structured data present and parseable |
+| `faq-schema-valid` | FAQPage JSON-LD has Questions with a name and an accepted answer |
 | `og-image` | `og:image` present |
 | `img-alt` | Every `<img>` has `alt` |
 | `internal-links` | Internal links resolve |
@@ -81,6 +87,8 @@ shows up in search, social and AI answers; 3 = polish. Within a tier, more failu
 - **Ratchet:** rules that failed on the first baseline start as `warning`, so CI passes while the
   site is fixed. When a task fixes a rule, delete its line. It becomes an `error`, and CI blocks
   any regression from then on.
+- `standard_since` (YYYY-MM-DD): posts dated on or after it must follow the answer-first post standard
+  (*Post standard* rules above). Without it, those rules don't run.
 - Optional: `skip_pages` and `private_files` (glob lists) for `audit-site`, `probe_private` (paths)
   for `audit-url`.
 
