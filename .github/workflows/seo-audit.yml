@@ -1,0 +1,118 @@
+name: SEO audit
+
+# Audits a live site with seo_audit (audit-url): posts a summary on the issue, commits the full report to
+# audits/<host>/<date>.md + .json and attaches both to the run. Only the repository owner can start it
+# (an issue by anyone else is skipped).
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "Target site, e.g. https://example.com"
+        required: true
+      max_pages:
+        description: "Max sitemap pages to check (1-200)"
+        default: "50"
+      client:
+        description: "Client name for the report title (optional)"
+        default: ""
+
+concurrency:
+  group: seo-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: github.event_name == 'workflow_dispatch' || (github.event.issue.user.login == github.repository_owner && contains(github.event.issue.labels.*.name, 'seo-audit'))
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+
+      - name: Read the request
+        id: req
+        # The issue body and the inputs are untrusted text: they reach the script through env vars only,
+        # and the script accepts only a public http(s) site.
+        env:
+          EVENT: ${{ github.event_name }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          IN_URL: ${{ inputs.url }}
+          IN_MAX: ${{ inputs.max_pages }}
+          IN_CLIENT: ${{ inputs.client }}
+        run: |
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            python -m scripts.issue_to_audit --url "$IN_URL" --max-pages "$IN_MAX" --client "$IN_CLIENT" > request.txt 2> request-error.txt
+          else
+            printf '%s' "$ISSUE_BODY" | python -m scripts.issue_to_audit > request.txt 2> request-error.txt
+          fi
+          cat request.txt >> "$GITHUB_OUTPUT"
+          cat request.txt
+
+      - name: Audit
+        id: audit
+        env:
+          URL: ${{ steps.req.outputs.url }}
+          HOST: ${{ steps.req.outputs.host }}
+          MAX_PAGES: ${{ steps.req.outputs.max_pages }}
+          CLIENT: ${{ steps.req.outputs.client }}
+          BLOB: ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.event.repository.default_branch }}
+        run: |
+          dir="audits/$HOST"
+          mkdir -p "$dir"
+          previous=$(ls "$dir"/*.json 2>/dev/null | sort | tail -n 1 || true)
+          report="$dir/$(date -u +%F)"
+          echo "report=$report" >> "$GITHUB_OUTPUT"
+          args=()
+          [ -n "$previous" ] && args+=(--previous "$previous")
+          [ -n "$CLIENT" ] && args+=(--title "$CLIENT")
+          set +e
+          python seo_audit audit-url "$URL" --max-pages "$MAX_PAGES" "${args[@]}" \
+            --json "$report.json" --markdown "$report.md" --summary summary.md --report-url "$BLOB/$report.md"
+          code=$?
+          set -e
+          # Exit 1 means the site has problems, which is what the report is for. Anything else is a tool failure.
+          [ "$code" -le 1 ] || exit "$code"
+          cat summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Save the report
+        env:
+          HOST: ${{ steps.req.outputs.host }}
+        run: |
+          git config user.name "homelab-bot"
+          git config user.email "homelab-bot@users.noreply.github.com"
+          git add audits
+          git diff --cached --quiet && exit 0
+          git commit -m "SEO audit of $HOST (run ${{ github.run_id }})"
+          for i in 1 2 3; do git pull --rebase -q && git push -q && exit 0; sleep 5; done
+          exit 1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: seo-audit-${{ steps.req.outputs.slug }}
+          path: ${{ steps.audit.outputs.report }}.*
+
+      - name: Report on the issue
+        if: always() && github.event_name == 'issues'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STATUS: ${{ job.status }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          {
+            if [ -s summary.md ]; then
+              cat summary.md
+            else
+              echo "SEO audit: **$STATUS**"
+              if [ -s request-error.txt ]; then echo; echo "Problem with the request: $(head -c 500 request-error.txt)"; fi
+            fi
+            echo
+            echo "[Run]($RUN_URL)"
+          } > comment.md
+          gh issue comment ${{ github.event.issue.number }} --body-file comment.md
