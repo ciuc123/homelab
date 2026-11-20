@@ -59,6 +59,10 @@ shows up in search, social and AI answers; 3 = polish. Within a tier, more failu
 | `llms-txt` | llms.txt exists |
 | `private-files` | Repo files (README.md, scripts, tools/, workers/…) aren't published |
 | `orphan-pages` | Every sitemap page is linked from another page |
+| `entity-schema` | The home page has Person/Organization JSON-LD with a name and `sameAs` profile links |
+| `article-author` | Every Article/BlogPosting in JSON-LD has an author (name or `@id`) |
+| `not-found-page` | A helpful 404 page exists; live: a missing URL returns status 404, not 200 (soft 404) |
+| `ai-search-crawlers` | robots.txt doesn't block search engines or AI answer crawlers (blocking training-only crawlers is fine) |
 
 ## Config and the ratchet
 

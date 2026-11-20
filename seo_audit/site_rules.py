@@ -7,6 +7,7 @@ from urllib.parse import urljoin, urlsplit
 from . import htmlscan
 from . import model as m
 from .page_rules import check_page, internal_targets
+from .schema_rules import blocked_bots, entity_problem
 
 SITEMAP_NS = "{http://www.sitemaps.org/schemas/sitemap/0.9}"
 DEFAULT_PRIVATE = ["README.md", "AGENT_PROMPTS.md", "*.sh", "tools/*", "tests/*", "workers/*", ".wrangler/*",
@@ -56,15 +57,23 @@ def audit_site(site_dir, results, config):
     pages = [f for f in site.files if f.endswith(".html") and not _matches(f, skip)]
 
     inlinks = {}
+    home = None
     for rel in sorted(pages):
         path = url_path(rel)
         page = htmlscan.scan(site.read(rel))
+        if path == "/":
+            home = page
         check_page(results, path, page, origin, site.exists)
         for target in internal_targets(origin + path, page.anchors, origin):
             if target != path:
                 inlinks.setdefault(target, set()).add(path)
 
     _site_wide(site, results, config, origin, inlinks)
+    problem = entity_problem(home.jsonld) if home else "no home page"
+    results.check(m.ENTITY_SCHEMA, "/", problem is None, problem or "")
+    nf = site.read("404.html") if "404.html" in site.fileset else ""
+    results.check(m.NOT_FOUND_PAGE, "/404.html", bool(nf.strip()) and "href=" in nf,
+                  "missing" if not nf.strip() else "404 page has no links to the rest of the site")
     return len(pages)
 
 
@@ -73,6 +82,9 @@ def _site_wide(site, results, config, origin, inlinks):
     results.check(m.ROBOTS_TXT, "/robots.txt",
                   robots is not None and any(l.lower().startswith("sitemap:") for l in robots.splitlines()),
                   "missing" if robots is None else "no Sitemap: line")
+    if robots is not None:
+        blocked = blocked_bots(robots)
+        results.check(m.AI_SEARCH_CRAWLERS, "/robots.txt", not blocked, "blocks: " + ", ".join(blocked))
 
     llms = site.read("llms.txt").strip() if "llms.txt" in site.fileset else ""
     results.check(m.LLMS_TXT, "/llms.txt", bool(llms), "missing or empty")

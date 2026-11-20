@@ -59,8 +59,9 @@ class ReportTest(unittest.TestCase):
 
     def test_previous_report_shows_changes(self):
         previous = {"meta": {"date": "2026-01-01"}, "summary": {"score": 50}, "rules": {"internal-links": {"failed": 7}}}
-        text = report.to_summary(bad_results(), {"target": "x"}, previous)
-        self.assertIn("Since 2026-01-01: score 50 → 61 (+11)", text)
+        r = bad_results()
+        text = report.to_summary(r, {"target": "x"}, previous)
+        self.assertIn("Since 2026-01-01: score 50 → %d (%+d)" % (r.score(), r.score() - 50), text)
         self.assertIn("3 failing (was 7)", text)
 
 
@@ -79,7 +80,8 @@ class CliReportOptionsTest(unittest.TestCase):
         with open(summ) as f:
             text = f.read()
         self.assertIn("## SEO audit: Acme", text)
-        self.assertIn("score 40 → 61", text)
+        r = bad_results()
+        self.assertIn("score 40 → %d" % r.score(), text)
 
     def test_unreadable_previous_is_ignored(self):
         tmp = tempfile.mkdtemp()

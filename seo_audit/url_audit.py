@@ -1,5 +1,6 @@
 """audit-url: the same page checks against a live site, discovered through its sitemap. Client mode."""
 import urllib.error
+import uuid
 import urllib.request
 from urllib.parse import urlsplit
 
@@ -7,6 +8,7 @@ from . import __version__
 from . import htmlscan
 from . import model as m
 from .page_rules import check_page, internal_targets
+from .schema_rules import blocked_bots, entity_problem
 from .site_rules import sitemap_paths
 
 UA = "seo-audit/%s" % __version__
@@ -24,7 +26,11 @@ class Http:
             with urllib.request.urlopen(req, timeout=self.timeout) as r:
                 return r.status, r.read().decode(r.headers.get_content_charset() or "utf-8", "replace"), r.geturl()
         except urllib.error.HTTPError as e:
-            return e.code, "", url
+            try:
+                body = e.read().decode(e.headers.get_content_charset() or "utf-8", "replace")
+            except (OSError, AttributeError):
+                body = ""
+            return e.code, body, url
         except (urllib.error.URLError, TimeoutError, OSError):
             return None, "", url
 
@@ -53,6 +59,14 @@ def audit_url(base_url, results, config, max_pages=50, max_links=300, http=None)
     sitemap_urls = [l.split(":", 1)[1].strip() for l in robots.splitlines() if l.lower().startswith("sitemap:")] if code == 200 else []
     results.check(m.ROBOTS_TXT, "/robots.txt", code == 200 and bool(sitemap_urls),
                   "HTTP %s" % code if code != 200 else "no Sitemap: line")
+    if code == 200:
+        blocked = blocked_bots(robots)
+        results.check(m.AI_SEARCH_CRAWLERS, "/robots.txt", not blocked, "blocks: " + ", ".join(blocked))
+
+    missing = "/seo-audit-missing-page-%s" % uuid.uuid4().hex[:12]
+    code404, body404, _ = http.get(origin + missing)
+    results.check(m.NOT_FOUND_PAGE, missing, code404 == 404 and "href=" in body404,
+                  "a missing page returns HTTP %s (soft 404)" % code404 if code404 != 404 else "404 page has no links")
 
     code, llms, _ = http.get(origin + "/llms.txt")
     results.check(m.LLMS_TXT, "/llms.txt", code == 200 and bool(llms.strip()), "HTTP %s" % code)
@@ -97,6 +111,9 @@ def audit_url(base_url, results, config, max_pages=50, max_links=300, http=None)
             continue
         loaded.append(path)
         page = htmlscan.scan(html)
+        if path == "/":
+            problem = entity_problem(page.jsonld)
+            results.check(m.ENTITY_SCHEMA, "/", problem is None, problem or "")
         check_page(results, path, page, origin, link_exists)
         for target in internal_targets(origin + path, page.anchors, origin):
             if target != path:
