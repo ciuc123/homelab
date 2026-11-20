@@ -36,6 +36,20 @@ class GuidanceTest(unittest.TestCase):
         self.assertEqual(fix_order(by_rule), ["internal-links", "title-length", "og-image", "tags-present"])
 
 
+class ScoreTest(unittest.TestCase):
+    def test_score_is_never_100_with_failures(self):
+        r = m.Results()
+        for i in range(999):
+            r.check(m.CANONICAL, "/p%d" % i, True)
+        r.check(m.CANONICAL, "/broken", False, "x")
+        self.assertEqual(r.score(), 99)
+
+    def test_all_passing_is_100(self):
+        r = m.Results()
+        r.check(m.CANONICAL, "/", True)
+        self.assertEqual(r.score(), 100)
+
+
 class ReportTest(unittest.TestCase):
     def test_markdown_has_fix_first_and_escapes_html(self):
         text = report.to_markdown(bad_results(), {"mode": "audit-site", "target": "x", "title": "Acme"})
