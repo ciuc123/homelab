@@ -1,0 +1,34 @@
+name: SEO audit
+description: Audit a live site (SEO, AI search, conversion basics) and get a report back on this issue
+title: "SEO audit: <site>"
+labels: [seo-audit]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Opening this issue starts the audit (only for the repository owner). A summary is posted here as a comment in a few minutes; the full report is committed to `audits/<host>/<date>.md`.
+        **This repository is public:** the comment and the report are visible to anyone.
+  - type: input
+    id: target
+    attributes:
+      label: Target site
+      description: The site's address. Pages are discovered through its robots.txt and sitemap.xml.
+      placeholder: https://example.com
+    validations:
+      required: true
+  - type: input
+    id: max_pages
+    attributes:
+      label: Max pages
+      description: How many sitemap pages to check (1-200). Default 50.
+      placeholder: "50"
+  - type: input
+    id: client
+    attributes:
+      label: Client name
+      description: Optional. Used as the report title.
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Optional context for yourself (not used by the audit).

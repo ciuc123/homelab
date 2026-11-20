@@ -16,6 +16,16 @@ Only issues opened by the repository owner run anything.
 
 **Dev version**: tick "Dev version" in the form (or `"dev_enabled": true` in the spec) and the run also provisions `dev.<domain>`: a `development` branch in the client repo served as a Vercel branch domain. Push to `development` to update dev, merge to `main` to update production. Details (including the dev database) in the infra-template README.
 
+## Audit a site (SEO, AI search, conversion basics)
+
+1. Open an issue with the **SEO audit** form: target site (required), max pages, client name (optional).
+2. The workflow (`.github/workflows/seo-audit.yml`) checks the request (a public http(s) site only), runs `seo_audit audit-url` over the pages in the site's sitemap, and comments a summary on the issue: score, and what to fix first with why and how.
+3. The full report is committed to `audits/<host>/<date>.md` (+ `.json`). Re-audit by opening a new issue: the report shows the score change since the last audit of that site.
+
+Without an issue: Actions -> SEO audit -> Run workflow, with the URL. Only issues opened by the repository owner run anything. **This repo is public, so audits are too.**
+
+The same tool gates ciuculescu.com's CI (`ciuc123.github.io`, `.github/workflows/seo-checks.yml`), pinned to a `seo-audit-v*` tag of this repo. Details: `seo_audit/README.md`.
+
 ## Secrets (Settings -> Secrets and variables -> Actions)
 
 See `.env.example`: `CF_API_TOKEN`, `CF_ZONE_ID`, `CF_ZONE_NAME`, `VERCEL_TOKEN`, `VERCEL_TEAM_ID` (optional), `NEON_API_KEY`, `GH_PAT`, `NPM_TOKEN`, `CLERK_PLATFORM_API_KEY` (optional).
@@ -30,6 +40,11 @@ See `.env.example`: `CF_API_TOKEN`, `CF_ZONE_ID`, `CF_ZONE_NAME`, `VERCEL_TOKEN`
 | `.github/workflows/provision-client.yml` | issue/dispatch -> infra-template |
 | `scripts/issue_to_spec.py` | issue form body -> `client.json` (tested in `tests/`) |
 | `scripts/setup-secrets.sh` | guided setup of the Actions secrets (1Password or hidden paste -> `gh secret set`) |
+| `.github/ISSUE_TEMPLATE/seo-audit.yml` | the SEO audit form |
+| `.github/workflows/seo-audit.yml` | issue/dispatch -> `seo_audit audit-url` -> comment + `audits/` |
+| `scripts/issue_to_audit.py` | SEO audit form body -> validated target (tested in `tests/`) |
+| `seo_audit/` | the audit tool (stdlib Python, own tests in `seo_audit/tests/`) |
+| `audits/` | audit reports, one folder per site |
 | `clients/` | the registry, one file per client |
 | (sales material) | moved to the private `pfa` repo: `sales/` and `projects/client-sites/` |
 

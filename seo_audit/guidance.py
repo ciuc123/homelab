@@ -1,0 +1,70 @@
+"""Plain-language guidance per rule, for the "What to fix first" section of a report.
+
+impact: 1 = fix first (lost visitors, leads or indexing), 2 = important (how the site shows up in
+search, social and AI answers), 3 = polish. Within a tier, rules with more failures come first."""
+
+GUIDANCE = {
+    # Whole site
+    "private-files": (1, "Files meant for developers are publicly downloadable. They can expose internals and they waste crawl budget.",
+                      "Exclude them from the build or block them at the server so they return 404."),
+    "form-action": (1, "A form that doesn't post anywhere silently drops every message, lead or sign-up.",
+                    "Point the form at a real endpoint, then submit it yourself and check the message arrives."),
+    "internal-links": (1, "Links to pages that don't exist lose readers and tell search engines the site isn't maintained.",
+                       "Fix each listed link to point at a page that exists, or remove it."),
+    "sitemap-urls-exist": (1, "The sitemap sends search engines to pages that don't load.",
+                           "Regenerate the sitemap from the real pages, or restore the missing ones."),
+    "sitemap": (1, "Without a valid sitemap, search engines discover pages slowly and may miss some.",
+                "Publish /sitemap.xml listing every page you want indexed, and submit it in Google Search Console and Bing Webmaster Tools."),
+    "robots-txt": (1, "robots.txt is the first file crawlers read; without a Sitemap line they have to guess where your pages are.",
+                   "Serve /robots.txt that allows crawling and ends with: Sitemap: https://your-domain/sitemap.xml"),
+    "single-title": (1, "The <title> is the blue link in search results. Missing or duplicated titles make pages hard to find and to click.",
+                     "Give every page exactly one <title> that names the page's topic, under about 60 characters."),
+    "canonical": (1, "Without a canonical URL, search engines may split ranking signals between duplicate addresses (www/non-www, query strings).",
+                  "Add <link rel=\"canonical\" href=\"https://…\"> with the page's preferred absolute URL."),
+    "post-cta": (1, "Readers who finish an article have no obvious next step, so interested visitors leave.",
+                 "End every article with a short offer and a link to the contact or booking page."),
+    # How the site shows up
+    "meta-description": (2, "Without a meta description, Google improvises the snippet under your link, often badly.",
+                         "Write a one or two sentence summary per page (50–160 characters) that says what the reader gets."),
+    "og-image": (2, "Links shared on LinkedIn, Slack, WhatsApp or X show no picture and get far fewer clicks.",
+                 "Add an og:image (1200×630) per page, or at least a branded site-wide default."),
+    "json-ld-present": (2, "Structured data tells search engines and AI assistants who you are and what each page is.",
+                        "Add JSON-LD: Organization or Person on the home page, Article or BlogPosting on posts, FAQPage where relevant."),
+    "json-ld-valid": (2, "Broken structured data is ignored, so the effort is wasted.",
+                      "Fix the JSON syntax and re-check the page in Google's Rich Results Test."),
+    "single-h1": (2, "The <h1> is the page's main heading. None, or several, blurs what the page is about.",
+                  "Use exactly one <h1> per page, usually the title, and <h2>/<h3> for sections."),
+    "orphan-pages": (2, "Pages no other page links to are hard for both visitors and crawlers to find, and rank poorly.",
+                     "Link to each listed page from at least one related page or a menu."),
+    "title-length": (2, "Titles over about 60 characters get cut off in search results.",
+                     "Shorten titles to 60 characters or fewer, keeping the main topic at the start."),
+    "description-present": (2, "Posts without a written description fall back to an auto-excerpt in search results.",
+                            "Add a description to each post's metadata (120–160 characters)."),
+    "llms-txt": (2, "llms.txt gives AI assistants a short, curated summary of who you are and your best pages.",
+                 "Publish /llms.txt: one paragraph about the business, the services, how to get in touch, and links to the key pages."),
+    # Polish
+    "meta-description-length": (3, "Descriptions that are too long get cut off; too short ones waste the space.",
+                                "Rewrite each listed description to 50–160 characters."),
+    "description-length": (3, "Post descriptions outside 120–160 characters get cut off or waste space in search results.",
+                           "Rewrite each listed description to 120–160 characters."),
+    "img-alt": (3, "Images without alt text are invisible to screen readers and image search.",
+                "Add alt text describing each image, or alt=\"\" for purely decorative ones."),
+    "tags-present": (3, "Untagged posts are harder to group into topic pages and related-post links.",
+                     "Give every post one to four tags from a small, fixed list."),
+    "min-word-count": (3, "Very short pages rarely rank and can drag down how search engines judge the whole site.",
+                       "Expand each listed page into a useful answer, merge it into a related page, or remove it."),
+    "stale-year-in-title": (3, "A past year in the title makes the page look outdated, so fewer people click.",
+                            "Update the content and the year, or drop the year from the title."),
+    "date-matches-filename": (3, "The publish date and the URL disagree, which confuses archives and readers.",
+                              "Make the date in the metadata match the one in the file name, without changing the live URL."),
+    "no-future-date": (3, "Posts dated in the future may not be published, or appear in the wrong order.",
+                       "Set the real publish date."),
+    "front-matter": (3, "The post's metadata can't be read, so its title, date and description may be wrong or missing.",
+                     "Fix the front matter block at the top of the file (between the --- lines)."),
+}
+
+
+def fix_order(by_rule):
+    """Failing rule ids ordered by impact tier, then by number of failures."""
+    failing = [rid for rid, r in by_rule.items() if r["failed"]]
+    return sorted(failing, key=lambda rid: (GUIDANCE.get(rid, (3,))[0], -by_rule[rid]["failed"], rid))
