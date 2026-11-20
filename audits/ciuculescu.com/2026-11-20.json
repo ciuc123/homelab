@@ -1,0 +1,355 @@
+{
+  "meta": {
+    "mode": "audit-url",
+    "target": "https://ciuculescu.com",
+    "date": "2026-11-20",
+    "version": "0.2.0",
+    "title": "ciuculescu.com"
+  },
+  "summary": {
+    "score": 84,
+    "checks": 347,
+    "passed": 290,
+    "errors": 57,
+    "warnings": 0
+  },
+  "rules": {
+    "robots-txt": {
+      "severity": "error",
+      "passed": 1,
+      "failed": 0,
+      "failures": []
+    },
+    "llms-txt": {
+      "severity": "error",
+      "passed": 0,
+      "failed": 1,
+      "failures": [
+        {
+          "target": "/llms.txt",
+          "message": "HTTP 404"
+        }
+      ]
+    },
+    "private-files": {
+      "severity": "error",
+      "passed": 0,
+      "failed": 1,
+      "failures": [
+        {
+          "target": "site",
+          "message": "reachable: /README.md"
+        }
+      ]
+    },
+    "sitemap": {
+      "severity": "error",
+      "passed": 1,
+      "failed": 0,
+      "failures": []
+    },
+    "sitemap-urls-exist": {
+      "severity": "error",
+      "passed": 29,
+      "failed": 0,
+      "failures": []
+    },
+    "single-title": {
+      "severity": "error",
+      "passed": 29,
+      "failed": 0,
+      "failures": []
+    },
+    "meta-description": {
+      "severity": "error",
+      "passed": 29,
+      "failed": 0,
+      "failures": []
+    },
+    "meta-description-length": {
+      "severity": "error",
+      "passed": 12,
+      "failed": 17,
+      "failures": [
+        {
+          "target": "/posts/2024-06-10-hello-world/",
+          "message": "meta description is 36 chars"
+        },
+        {
+          "target": "/posts/2025-09-12-php-security-audit-lessons-laravel-developers/",
+          "message": "meta description is 316 chars"
+        },
+        {
+          "target": "/posts/2025-09-14-php-property-hooks-game-changer/",
+          "message": "meta description is 438 chars"
+        },
+        {
+          "target": "/posts/2025-09-17-php-84-performance-boost/",
+          "message": "meta description is 44 chars"
+        },
+        {
+          "target": "/posts/2025-09-29-laravel-testing-docker-optimization/",
+          "message": "meta description is 354 chars"
+        },
+        {
+          "target": "/posts/2025-10-02-preventing-n-plus-one/",
+          "message": "meta description is 392 chars"
+        },
+        {
+          "target": "/posts/2025-10-03-laravel-testing-workflow-phpstorm/",
+          "message": "meta description is 336 chars"
+        },
+        {
+          "target": "/posts/2025-10-07-laravel-ai-agents/",
+          "message": "meta description is 377 chars"
+        },
+        {
+          "target": "/posts/2025-10-07-linkedin-lead-automation-zapier/",
+          "message": "meta description is 285 chars"
+        },
+        {
+          "target": "/posts/2025-10-09-stripe-security-laravel/",
+          "message": "meta description is 471 chars"
+        },
+        {
+          "target": "/posts/2025-10-13-php-84-migration-roi/",
+          "message": "meta description is 297 chars"
+        },
+        {
+          "target": "/posts/2025-10-15-docker-security-best-practices/",
+          "message": "meta description is 428 chars"
+        },
+        {
+          "target": "/posts/2025-10-16-laravel-11-migration-guide-for-php-teams/",
+          "message": "meta description is 393 chars"
+        },
+        {
+          "target": "/posts/2025-10-22-laravel-testing-strategies/",
+          "message": "meta description is 357 chars"
+        },
+        {
+          "target": "/posts/2025-11-03-laravel-queue-performance-optimization/",
+          "message": "meta description is 303 chars"
+        },
+        {
+          "target": "/posts/2025-11-05-laravel-11-slim-architecture/",
+          "message": "meta description is 362 chars"
+        },
+        {
+          "target": "/posts/2025-11-18-wordpress-scheduling-themes-multiple-locations/",
+          "message": "meta description is 377 chars"
+        }
+      ]
+    },
+    "canonical": {
+      "severity": "error",
+      "passed": 29,
+      "failed": 0,
+      "failures": []
+    },
+    "single-h1": {
+      "severity": "error",
+      "passed": 22,
+      "failed": 7,
+      "failures": [
+        {
+          "target": "/posts/2025-09-15-phpstorm-laravel-xdebug/",
+          "message": "2 <h1> elements"
+        },
+        {
+          "target": "/posts/2025-09-17-php-84-performance-boost/",
+          "message": "2 <h1> elements"
+        },
+        {
+          "target": "/posts/2025-09-23-laravel-security-crisis-app-key-rce/",
+          "message": "2 <h1> elements"
+        },
+        {
+          "target": "/posts/2025-09-25-laravel-11-php-8-3-performance-revolution/",
+          "message": "2 <h1> elements"
+        },
+        {
+          "target": "/posts/2025-09-27-linkedin-automation-workflow/",
+          "message": "2 <h1> elements"
+        },
+        {
+          "target": "/contact/",
+          "message": "0 <h1> elements"
+        },
+        {
+          "target": "/posts/",
+          "message": "0 <h1> elements"
+        }
+      ]
+    },
+    "json-ld-present": {
+      "severity": "error",
+      "passed": 29,
+      "failed": 0,
+      "failures": []
+    },
+    "json-ld-valid": {
+      "severity": "error",
+      "passed": 29,
+      "failed": 0,
+      "failures": []
+    },
+    "og-image": {
+      "severity": "error",
+      "passed": 0,
+      "failed": 29,
+      "failures": [
+        {
+          "target": "/posts/2024-06-10-hello-world/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/posts/2025-08-09-remove-secret-content/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/posts/2025-09-12-php-security-audit-lessons-laravel-developers/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/posts/2025-09-14-php-property-hooks-game-changer/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/posts/2025-09-15-phpstorm-laravel-xdebug/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/posts/2025-09-17-php-84-performance-boost/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/posts/2025-09-23-laravel-security-crisis-app-key-rce/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/posts/2025-09-25-laravel-11-php-8-3-performance-revolution/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/posts/2025-09-27-linkedin-automation-workflow/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/posts/2025-09-29-laravel-testing-docker-optimization/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/posts/2025-10-02-preventing-n-plus-one/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/posts/2025-10-03-laravel-testing-workflow-phpstorm/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/posts/2025-10-07-laravel-ai-agents/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/posts/2025-10-07-linkedin-lead-automation-zapier/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/posts/2025-10-09-stripe-security-laravel/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/posts/2025-10-13-php-84-migration-roi/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/posts/2025-10-15-docker-security-best-practices/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/posts/2025-10-16-laravel-11-migration-guide-for-php-teams/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/posts/2025-10-22-laravel-testing-strategies/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/posts/2025-11-03-laravel-queue-performance-optimization/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/posts/2025-11-05-laravel-11-slim-architecture/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/posts/2025-11-18-wordpress-scheduling-themes-multiple-locations/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/posts/2026-11-19-phpstorm-terminal-alt-left-right-plugin/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/posts/2026-11-20-seo-client-zero-1-contact-form/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/about/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/contact/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/posts/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/",
+          "message": "no og:image"
+        },
+        {
+          "target": "/AGENT_PROMPTS/",
+          "message": "no og:image"
+        }
+      ]
+    },
+    "post-cta": {
+      "severity": "error",
+      "passed": 24,
+      "failed": 0,
+      "failures": []
+    },
+    "internal-links": {
+      "severity": "error",
+      "passed": 28,
+      "failed": 1,
+      "failures": [
+        {
+          "target": "/posts/2025-11-05-laravel-11-slim-architecture/",
+          "message": "broken: /posts/2024-11-08-laravel-11-slim-architecture"
+        }
+      ]
+    },
+    "form-action": {
+      "severity": "error",
+      "passed": 1,
+      "failed": 0,
+      "failures": []
+    },
+    "orphan-pages": {
+      "severity": "error",
+      "passed": 27,
+      "failed": 1,
+      "failures": [
+        {
+          "target": "/AGENT_PROMPTS/",
+          "message": "no other page links here"
+        }
+      ]
+    }
+  }
+}
