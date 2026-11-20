@@ -1,0 +1,40 @@
+name: PHP version benchmark (Laravel)
+
+# Manual run: builds the benchmark app and runs PHP 8.3 / 8.4 / 8.5 interleaved.
+# Results are uploaded as an artifact (results.jsonl + summary.md).
+on:
+  workflow_dispatch:
+    inputs:
+      rounds:
+        description: "Interleaved rounds"
+        default: "8"
+
+permissions:
+  contents: read
+
+jobs:
+  bench:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Machine
+        run: nproc && grep -m1 'model name' /proc/cpuinfo && free -g | head -2
+      - name: Build app and images
+        run: benchmarks/laravel-php/setup.sh
+      - name: Run
+        working-directory: benchmarks/laravel-php
+        env:
+          ROUNDS: ${{ inputs.rounds }}
+          OUT: results.jsonl
+          CPUS: "0-1"
+        run: ./run.sh
+      - name: Summarize
+        working-directory: benchmarks/laravel-php
+        run: python3 summarize.py results.jsonl | tee summary.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: php-bench-results
+          path: |
+            benchmarks/laravel-php/results.jsonl
+            benchmarks/laravel-php/summary.md
