@@ -44,6 +44,12 @@ class SiteRulesTest(unittest.TestCase):
         self.assertEqual(f[m.NOT_FOUND_PAGE], {"/404.html"})
         self.assertEqual(f[m.ARTICLE_AUTHOR], {"/orphan/"})
 
+    def test_redirect_stub_is_not_audited_as_a_page(self):
+        r = m.Results()
+        audit_site(fixture("site_good"), r, CONFIG)  # site_good/old-post/ is a meta-refresh stub
+        self.assertFalse(any(c[1] == "/old-post/" for c in r.checks))
+        self.assertTrue(htmlscan.scan(open(fixture("site_good") + "/old-post/index.html").read()).is_redirect())
+
     def test_broken_link_message_names_the_target(self):
         r = m.Results()
         audit_site(fixture("site_bad"), r, CONFIG)
