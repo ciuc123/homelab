@@ -104,3 +104,7 @@ python3 -m unittest discover -s seo_audit/tests
 The fixtures in `tests/fixtures/` are a good site and posts that pass every rule, and a bad site
 and posts that fail each rule at least once. `audit-url` is tested against the fixtures served by a
 local HTTP server.
+
+## Client deliverable
+
+[deliverable/](deliverable/) turns an audit run into a client report: a five-area rubric, a manual checklist for what the tool can't see (speed after load, analytics, hosting paths, AI answers), a report template, and `visit-weight.js` to measure bytes after load.
