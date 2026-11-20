@@ -54,13 +54,17 @@ def audit_site(site_dir, results, config):
     base = config.get("base_url", "https://example.com").rstrip("/")
     origin = "%s://%s" % urlsplit(base)[:2]
     skip = config.get("skip_pages", DEFAULT_SKIP_PAGES)
-    pages = [f for f in site.files if f.endswith(".html") and not _matches(f, skip)]
+    candidates = [f for f in site.files if f.endswith(".html") and not _matches(f, skip)]
 
     inlinks = {}
     home = None
-    for rel in sorted(pages):
+    pages = []
+    for rel in sorted(candidates):
         path = url_path(rel)
         page = htmlscan.scan(site.read(rel))
+        if page.is_redirect():
+            continue  # a redirect stub keeps an old URL working; it isn't a page
+        pages.append(rel)
         if path == "/":
             home = page
         check_page(results, path, page, origin, site.exists)

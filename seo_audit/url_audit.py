@@ -109,8 +109,10 @@ def audit_url(base_url, results, config, max_pages=50, max_links=300, http=None)
         results.check(m.SITEMAP_URLS, path, ok, "HTTP %s" % code)
         if not ok:
             continue
-        loaded.append(path)
         page = htmlscan.scan(html)
+        if page.is_redirect():
+            continue
+        loaded.append(path)
         if path == "/":
             problem = entity_problem(page.jsonld)
             results.check(m.ENTITY_SCHEMA, "/", problem is None, problem or "")

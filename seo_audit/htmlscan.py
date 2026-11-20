@@ -69,6 +69,13 @@ class PageScan(HTMLParser):
                 return m.get("content")
         return None
 
+    def is_redirect(self):
+        """A meta-refresh stub (e.g. jekyll-redirect-from): a redirect, not a page to audit."""
+        for m in self.metas:
+            if m.get("http-equiv", "").lower() == "refresh" and "url=" in m.get("content", "").lower():
+                return True
+        return False
+
     def canonical(self):
         for l in self.links:
             if "canonical" in l.get("rel", "").lower().split():
