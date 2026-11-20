@@ -102,9 +102,13 @@ class Results:
         return [c for c in self.active() if c[2]]
 
     def score(self):
-        """Share of active checks that pass, 0-100. Errors and warnings count the same."""
+        """Share of active checks that pass, 0-100. Errors and warnings count the same.
+        Never 100 while anything fails, even when rounding would say so."""
         active = self.active()
-        return 100 if not active else round(100 * len(self.passes) / len(active))
+        if not active:
+            return 100
+        score = round(100 * len(self.passes) / len(active))
+        return min(score, 99) if len(self.passes) < len(active) else score
 
     def by_rule(self):
         out = {}
