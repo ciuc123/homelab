@@ -4,6 +4,7 @@ import re
 from urllib.parse import urljoin, urlsplit
 
 from . import model as m
+from .schema_rules import articles_without_author
 
 POST_URL = re.compile(r"^/posts/\d{4}-\d{2}-\d{2}-[^/]+/?$")
 SKIP_SCHEMES = ("mailto:", "tel:", "javascript:", "data:")
@@ -53,6 +54,10 @@ def check_page(results, path, page, site_origin, link_exists):
     results.check(m.JSON_LD_PRESENT, t, bool(page.jsonld), "no JSON-LD")
     if page.jsonld:
         results.check(m.JSON_LD_VALID, t, not bad, "; ".join(bad))
+
+    n_articles, no_author = articles_without_author(page.jsonld)
+    if n_articles:
+        results.check(m.ARTICLE_AUTHOR, t, no_author == 0, "%d of %d articles without an author" % (no_author, n_articles))
 
     results.check(m.OG_IMAGE, t, bool((page.meta(prop="og:image") or "").strip()), "no og:image")
 

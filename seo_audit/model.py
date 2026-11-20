@@ -42,6 +42,7 @@ OG_IMAGE = rule("og-image", ERROR, "Page has og:image")
 IMG_ALT = rule("img-alt", ERROR, "Every <img> has an alt attribute")
 INTERNAL_LINKS = rule("internal-links", ERROR, "Internal links point to pages that exist")
 POST_CTA = rule("post-cta", ERROR, "Every post has a call to action (.post-cta)")
+ARTICLE_AUTHOR = rule("article-author", ERROR, "Every Article/BlogPosting in JSON-LD has an author")
 FORM_ACTION = rule("form-action", ERROR, "Every <form> posts to a real endpoint (non-empty action)")
 
 # Whole site
@@ -51,6 +52,9 @@ SITEMAP_URLS = rule("sitemap-urls-exist", ERROR, "Every sitemap URL resolves to 
 LLMS_TXT = rule("llms-txt", ERROR, "llms.txt exists and isn't empty")
 PRIVATE_FILES = rule("private-files", ERROR, "Private repo files aren't published")
 ORPHAN_PAGES = rule("orphan-pages", ERROR, "Every sitemap page is linked from another page")
+ENTITY_SCHEMA = rule("entity-schema", ERROR, "The home page names who's behind the site (Person/Organization JSON-LD with sameAs)")
+NOT_FOUND_PAGE = rule("not-found-page", ERROR, "Missing pages get a real 404 with a helpful page (no soft 404)")
+AI_SEARCH_CRAWLERS = rule("ai-search-crawlers", ERROR, "robots.txt doesn't block search engines or AI answer crawlers")
 
 
 class Results:

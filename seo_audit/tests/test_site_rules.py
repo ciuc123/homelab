@@ -15,7 +15,8 @@ class SiteRulesTest(unittest.TestCase):
         self.assertEqual(audit_site(fixture("site_good"), r, CONFIG), 4)
         self.assertEqual(failed(r), {})
         evaluated = {c[0] for c in r.checks}
-        for rule in (m.POST_CTA, m.FORM_ACTION, m.IMG_ALT, m.ORPHAN_PAGES, m.LLMS_TXT, m.ROBOTS_TXT):
+        for rule in (m.POST_CTA, m.FORM_ACTION, m.IMG_ALT, m.ORPHAN_PAGES, m.LLMS_TXT, m.ROBOTS_TXT,
+                     m.ENTITY_SCHEMA, m.NOT_FOUND_PAGE, m.ARTICLE_AUTHOR, m.AI_SEARCH_CRAWLERS):
             self.assertIn(rule, evaluated)
 
     def test_bad_site_fails_every_site_rule(self):
@@ -39,6 +40,9 @@ class SiteRulesTest(unittest.TestCase):
         self.assertEqual(f[m.PRIVATE_FILES], {"site"})
         self.assertEqual(f[m.SITEMAP_URLS], {"/gone/"})
         self.assertEqual(f[m.ORPHAN_PAGES], {"/orphan/"})
+        self.assertEqual(f[m.ENTITY_SCHEMA], {"/"})
+        self.assertEqual(f[m.NOT_FOUND_PAGE], {"/404.html"})
+        self.assertEqual(f[m.ARTICLE_AUTHOR], {"/orphan/"})
 
     def test_broken_link_message_names_the_target(self):
         r = m.Results()
