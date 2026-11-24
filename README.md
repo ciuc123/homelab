@@ -26,9 +26,23 @@ Without an issue: Actions -> SEO audit -> Run workflow, with the URL. Only issue
 
 The same tool gates ciuculescu.com's CI (`ciuc123.github.io`, `.github/workflows/seo-checks.yml`), pinned to a `seo-audit-v*` tag of this repo. Details: `seo_audit/README.md`.
 
+## Watch free-tier usage
+
+`.github/workflows/usage-guard.yml` runs `python -m infra usage check` (infra-template, README "Usage guard") every 3 hours over the sites in `clients/` that have a `usage` block (today `job-radar.json`). It compares each free quota with a baseline that ends at 90% of the limit, emails a morning summary and, at 20% over, a root-cause report, and sets `USAGE_VERCEL`, `USAGE_NEON` and `USAGE_ACTIONS` on the site's repo so its workflows and deploy scripts slow down. Report-only until the variable `USAGE_APPLY` is `true`. It only reads usage APIs: it never deploys, never wakes a database and never pauses production. The log shows levels only; numbers go by email.
+
+Switching it on, once the guard is on an `infra-template` branch (`feat/usage-guard` first, `main` after the merge):
+
+1. `scripts/setup-secrets.sh --usage`: asks for `SENTRY_AUTH_TOKEN` and `RESEND_API_KEY` (hidden; empty skips; 1Password items `homelab <KEY>` are used when present), then the variables `USAGE_EMAIL_TO`, `USAGE_EMAIL_FROM`, `USAGE_STATE_REPO` (`ciuc123/infra-template`), `USAGE_GUARD_REF` (`feat/usage-guard` while testing) and `USAGE_APPLY` (keep `false`). `VERCEL_TOKEN`, `NEON_API_KEY` and `GH_PAT` are already set for provisioning and are reused.
+2. Actions -> Usage guard -> Run workflow (apply unticked). Check the email: one line per quota, numbers that match the Vercel and Neon usage pages. The run log shows levels only.
+3. Calibrate the Vercel CPU estimate once (Hobby does not expose CPU): read "Fluid Active CPU" on vercel.com -> Usage and run `python -m infra usage calibrate vercel-cpu <minutes>` from infra-template with the same env vars (or ask Claude to). Repeat once a month.
+4. After a few report-only runs that look right: `scripts/setup-secrets.sh USAGE_APPLY` -> `true`. From then on scheduled runs set `USAGE_VERCEL`, `USAGE_NEON` and `USAGE_ACTIONS` on the site repos and slow the Sentry uptime check when needed.
+5. Once `feat/usage-guard` is merged in infra-template: `scripts/setup-secrets.sh USAGE_GUARD_REF` -> `main`.
+
+To stop it: `scripts/setup-secrets.sh USAGE_APPLY` -> `false` (report only), or disable the workflow (`gh workflow disable usage-guard.yml`). The levers it set stay as they are; set the site's `USAGE_*` variables back to `0` by hand or let the next applying run do it.
+
 ## Secrets (Settings -> Secrets and variables -> Actions)
 
-See `.env.example`: `CF_API_TOKEN`, `CF_ZONE_ID`, `CF_ZONE_NAME`, `VERCEL_TOKEN`, `VERCEL_TEAM_ID` (optional), `NEON_API_KEY`, `GH_PAT`, `NPM_TOKEN`, `CLERK_PLATFORM_API_KEY` (optional).
+See `.env.example`: `CF_API_TOKEN`, `CF_ZONE_ID`, `CF_ZONE_NAME`, `VERCEL_TOKEN`, `VERCEL_TEAM_ID` (optional), `NEON_API_KEY`, `GH_PAT`, `NPM_TOKEN`, `CLERK_PLATFORM_API_KEY` (optional). For the usage guard: `SENTRY_AUTH_TOKEN` and `RESEND_API_KEY` (optional), the variables `USAGE_EMAIL_FROM`, `USAGE_EMAIL_TO`, `USAGE_STATE_REPO`, `USAGE_APPLY`, `USAGE_GUARD_REF`; `GH_PAT` (classic, `repo` scope) already covers the variables and workflow runs it touches.
 
 `scripts/setup-secrets.sh` sets them all in one sitting: per key it prints the page to create it on and the scopes, reads the value from 1Password (item `homelab <KEY>`, field `credential`) or a hidden paste, and pushes it with `gh secret set`. Rotation = update 1Password, re-run. Never paste a secret into a workflow input or an issue: both are stored readably in the run/issue history. These secrets live only here — client repos get their `NPM_TOKEN` from the provisioning run itself.
 

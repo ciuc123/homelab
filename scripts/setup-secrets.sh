@@ -10,15 +10,31 @@
 #   scripts/setup-secrets.sh                    walk through every key (empty paste = skip)
 #   scripts/setup-secrets.sh VERCEL_TOKEN ...   only these keys
 #   OP_VAULT=Private HOMELAB_REPO=ciuc123/homelab scripts/setup-secrets.sh
+#   scripts/setup-secrets.sh --usage            only what the usage guard needs (2 secrets, then its variables)
+#
+# Variables (not secret, for the usage guard) are asked for in the open with a suggested default and set with
+# `gh variable set`; they are only asked for with --usage or when one is named on the command line.
 #
 # Rotation later: update the 1Password item, re-run the script, done.
 set -euo pipefail
 
 REPO="${HOMELAB_REPO:-ciuc123/homelab}"
 VAULT="${OP_VAULT:-Private}"
-ALL_KEYS=(CF_API_TOKEN CF_ZONE_ID CF_ZONE_NAME VERCEL_TOKEN VERCEL_TEAM_ID NEON_API_KEY GH_PAT NPM_TOKEN CLERK_PLATFORM_API_KEY)
-KEYS=("$@")
-if [ ${#KEYS[@]} -eq 0 ]; then KEYS=("${ALL_KEYS[@]}"); fi
+ALL_KEYS=(CF_API_TOKEN CF_ZONE_ID CF_ZONE_NAME VERCEL_TOKEN VERCEL_TEAM_ID NEON_API_KEY GH_PAT NPM_TOKEN CLERK_PLATFORM_API_KEY SENTRY_AUTH_TOKEN RESEND_API_KEY)
+# The usage guard (.github/workflows/usage-guard.yml) also reads VERCEL_TOKEN, NEON_API_KEY and GH_PAT, set above.
+USAGE_SECRETS=(SENTRY_AUTH_TOKEN RESEND_API_KEY)
+USAGE_VARS=(USAGE_EMAIL_TO USAGE_EMAIL_FROM USAGE_STATE_REPO USAGE_GUARD_REF USAGE_APPLY)
+KEYS=()
+VARS=()
+if [ "${1:-}" = "--usage" ]; then
+  KEYS=("${USAGE_SECRETS[@]}")
+  VARS=("${USAGE_VARS[@]}")
+else
+  for arg in "$@"; do
+    case " ${USAGE_VARS[*]} " in *" $arg "*) VARS+=("$arg") ;; *) KEYS+=("$arg") ;; esac
+  done
+  if [ $# -eq 0 ]; then KEYS=("${ALL_KEYS[@]}"); fi
+fi
 
 guide() {
   case "$1" in
@@ -49,7 +65,8 @@ EOF
       ;;
     GH_PAT) cat <<'EOF'
   Create:  https://github.com/settings/tokens/new  ->  classic token, scopes: repo + workflow
-  Used to create the client repos and to read the private infra-template.
+  Used to create the client repos and to read the private infra-template. The usage guard also uses it to set the
+  USAGE_* variables on watched repos, keep its state in USAGE_STATE and read workflow runs (all covered by "repo").
 EOF
       ;;
     NPM_TOKEN) cat <<'EOF'
@@ -62,6 +79,29 @@ EOF
   Without it, the run prints a manual Clerk checklist instead.
 EOF
       ;;
+    SENTRY_AUTH_TOKEN) cat <<'EOF'
+  Usage guard. Create:  https://sentry.io/settings/account/api/auth-tokens/  ->  Create New Token (a personal token;
+  organization tokens only allow CI scopes). Scopes: org:read, project:read, project:write.
+  Used to list the uptime monitors and to slow the uptime check down when Vercel usage runs over plan. Optional.
+EOF
+      ;;
+    RESEND_API_KEY) cat <<'EOF'
+  Usage guard. Create:  https://resend.com/api-keys  ->  Create API Key, permission "Sending access", domain: the one
+  USAGE_EMAIL_FROM is on. Use a key of its own, not a site's. Without it there is no email (a level going up still
+  fails the run, so GitHub's failed-run email is the fallback).
+EOF
+      ;;
+  esac
+}
+
+# Variables: "suggested default|what it is".
+var_help() {
+  case "$1" in
+    USAGE_EMAIL_TO) echo "|where the morning summary and alerts go" ;;
+    USAGE_EMAIL_FROM) echo "|sender, an address on a domain verified in Resend" ;;
+    USAGE_STATE_REPO) echo "ciuc123/infra-template|repo whose Actions variable USAGE_STATE holds the guard's state" ;;
+    USAGE_GUARD_REF) echo "main|infra-template branch to run (feat/usage-guard while testing; main once merged)" ;;
+    USAGE_APPLY) echo "false|true lets scheduled runs switch the levers; keep false until a few report-only runs look right" ;;
   esac
 }
 
@@ -94,5 +134,27 @@ for key in "${KEYS[@]}"; do
   echo "  Set on $REPO."
 done
 
+for var in "${VARS[@]}"; do
+  help="$(var_help "$var")"
+  default="${help%%|*}"
+  what="${help#*|}"
+  current="$(gh variable get "$var" -R "$REPO" 2>/dev/null || true)"
+  echo
+  echo "== $var (variable) =="
+  echo "  $what"
+  if [ -n "$current" ]; then echo "  Now: $current"; fi
+  read -r -p "  Value [${current:-$default}] (- = delete): " value
+  value="${value:-${current:-$default}}"
+  if [ "$value" = "-" ]; then
+    gh variable delete "$var" -R "$REPO" >/dev/null 2>&1 || true
+    echo "  Deleted."
+  elif [ -z "$value" ]; then
+    echo "  Skipped."
+  else
+    gh variable set "$var" -R "$REPO" --body "$value"
+    echo "  Set on $REPO."
+  fi
+done
+
 echo
-echo "Done. Check: gh secret list -R $REPO"
+echo "Done. Check: gh secret list -R $REPO; gh variable list -R $REPO"

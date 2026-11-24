@@ -1,0 +1,71 @@
+name: Usage guard
+
+# Compares each free quota (Vercel Hobby CPU and invocations, Neon transfer and compute, GitHub Actions minutes) of the
+# sites in clients/*.json that have a "usage" block with a baseline that ends at 90% of the limit, and turns the light
+# levers down when usage runs 20% over it. Code and rules: infra-template (`python -m infra usage`, README "Usage guard").
+# It runs here because this repo is public, so its Actions minutes are free, and it only reads the vendors' usage APIs:
+# it never deploys, never wakes a database and never pauses production.
+#
+# This repo is PUBLIC: the log prints only levels and quota names. Numbers and the root-cause report go by email only;
+# the report files stay on the runner and are not uploaded.
+#
+# Switches (Settings -> Secrets and variables -> Actions):
+#   vars.USAGE_APPLY = "true"   lets scheduled runs switch the levers (until then every run is report-only)
+#   vars.USAGE_GUARD_REF        infra-template ref to run (default main)
+#   vars.USAGE_STATE_REPO       repo whose Actions variable USAGE_STATE holds the guard's state (e.g. ciuc123/infra-template)
+#   vars.USAGE_EMAIL_FROM, vars.USAGE_EMAIL_TO, secrets.RESEND_API_KEY   email (skipped when missing)
+#   secrets.SENTRY_AUTH_TOKEN   the uptime-interval lever and the monitor list (skipped when missing)
+on:
+  schedule:
+    - cron: "17 */3 * * *"
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Switch the levers in this run (otherwise report only, unless vars.USAGE_APPLY is true)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: usage-guard
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    # Scheduled runs wait until the guard is set up (scripts/setup-secrets.sh --usage sets USAGE_STATE_REPO); a manual run
+    # always goes. So merging this file before the setup sends no failing runs.
+    if: github.event_name == 'workflow_dispatch' || vars.USAGE_STATE_REPO != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/infra-template
+          ref: ${{ vars.USAGE_GUARD_REF || 'main' }}
+          token: ${{ secrets.GH_PAT }}
+          path: infra
+
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+
+      - name: Check usage
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          GH_PAT: ${{ secrets.GH_PAT }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          USAGE_EMAIL_FROM: ${{ vars.USAGE_EMAIL_FROM }}
+          USAGE_EMAIL_TO: ${{ vars.USAGE_EMAIL_TO }}
+          USAGE_STATE_REPO: ${{ vars.USAGE_STATE_REPO }}
+          APPLY: ${{ inputs.apply == true || vars.USAGE_APPLY == 'true' }}
+        run: |
+          args=(usage check --registry "$GITHUB_WORKSPACE/clients" --email
+                --json "$RUNNER_TEMP/usage.json" --markdown "$RUNNER_TEMP/usage.md")
+          if [ "$APPLY" = "true" ]; then args+=(--apply); fi
+          cd infra
+          python -m infra "${args[@]}"
