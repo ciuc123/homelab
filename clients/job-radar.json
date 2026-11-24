@@ -1,0 +1,26 @@
+{
+  "name": "job-radar",
+  "repo": "ciuc123/job-radar",
+  "domain": "jobs.ciuculescu.com",
+  "note": "registered by hand on 2026-11-24 for the usage guard; not provisioned by infra-template",
+  "vercel_project_id": "prj_5KQNqqtgRj3vjbvyD54bJHMHCHTC",
+  "neon_project_id": "shiny-flower-58559384",
+  "usage": {
+    "github_repo": "ciuc123/job-radar",
+    "vercel": {
+      "team_id": "team_XYAR6gQjlQ9RQ1Mzy4dK7nvC",
+      "project_ids": ["prj_5KQNqqtgRj3vjbvyD54bJHMHCHTC"],
+      "cycle_start_day": 25
+    },
+    "neon": {
+      "project_ids": ["shiny-flower-58559384", "calm-firefly-57379658"]
+    },
+    "sentry": {
+      "org": "ciuculescu",
+      "project": "job-radar",
+      "uptime_monitor_id": "2672580",
+      "normal_interval_seconds": 1200,
+      "slow_interval_seconds": 3600
+    }
+  }
+}

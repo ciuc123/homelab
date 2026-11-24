@@ -26,9 +26,13 @@ Without an issue: Actions -> SEO audit -> Run workflow, with the URL. Only issue
 
 The same tool gates ciuculescu.com's CI (`ciuc123.github.io`, `.github/workflows/seo-checks.yml`), pinned to a `seo-audit-v*` tag of this repo. Details: `seo_audit/README.md`.
 
+## Watch free-tier usage
+
+`.github/workflows/usage-guard.yml` runs `python -m infra usage check` (infra-template, README "Usage guard") every 3 hours over the sites in `clients/` that have a `usage` block (today `job-radar.json`). It compares each free quota with a baseline that ends at 90% of the limit, emails a morning summary and, at 20% over, a root-cause report, and sets `USAGE_VERCEL`, `USAGE_NEON` and `USAGE_ACTIONS` on the site's repo so its workflows and deploy scripts slow down. Report-only until the variable `USAGE_APPLY` is `true`. It only reads usage APIs: it never deploys, never wakes a database and never pauses production. The log shows levels only; numbers go by email.
+
 ## Secrets (Settings -> Secrets and variables -> Actions)
 
-See `.env.example`: `CF_API_TOKEN`, `CF_ZONE_ID`, `CF_ZONE_NAME`, `VERCEL_TOKEN`, `VERCEL_TEAM_ID` (optional), `NEON_API_KEY`, `GH_PAT`, `NPM_TOKEN`, `CLERK_PLATFORM_API_KEY` (optional).
+See `.env.example`: `CF_API_TOKEN`, `CF_ZONE_ID`, `CF_ZONE_NAME`, `VERCEL_TOKEN`, `VERCEL_TEAM_ID` (optional), `NEON_API_KEY`, `GH_PAT`, `NPM_TOKEN`, `CLERK_PLATFORM_API_KEY` (optional). For the usage guard: `SENTRY_AUTH_TOKEN` and `RESEND_API_KEY` (optional), the variables `USAGE_EMAIL_FROM`, `USAGE_EMAIL_TO`, `USAGE_STATE_REPO`, `USAGE_APPLY`, `USAGE_GUARD_REF`; `GH_PAT` also needs Variables read and write on the watched repos and the state repo.
 
 `scripts/setup-secrets.sh` sets them all in one sitting: per key it prints the page to create it on and the scopes, reads the value from 1Password (item `homelab <KEY>`, field `credential`) or a hidden paste, and pushes it with `gh secret set`. Rotation = update 1Password, re-run. Never paste a secret into a workflow input or an issue: both are stored readably in the run/issue history. These secrets live only here — client repos get their `NPM_TOKEN` from the provisioning run itself.
 
