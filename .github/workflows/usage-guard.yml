@@ -34,6 +34,9 @@ permissions:
 
 jobs:
   check:
+    # Scheduled runs wait until the guard is set up (scripts/setup-secrets.sh --usage sets USAGE_STATE_REPO); a manual run
+    # always goes. So merging this file before the setup sends no failing runs.
+    if: github.event_name == 'workflow_dispatch' || vars.USAGE_STATE_REPO != ''
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
