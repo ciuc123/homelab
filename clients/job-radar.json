@@ -15,6 +15,11 @@
     "neon": {
       "project_ids": ["shiny-flower-58559384", "calm-firefly-57379658"]
     },
+    "labels": {
+      "team_XYAR6gQjlQ9RQ1Mzy4dK7nvC": "Hobby team",
+      "shiny-flower-58559384": "production database",
+      "calm-firefly-57379658": "dev database"
+    },
     "sentry": {
       "org": "ciuculescu",
       "project": "job-radar",
