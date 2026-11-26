@@ -11,6 +11,7 @@
       "team_id": "team_XYAR6gQjlQ9RQ1Mzy4dK7nvC",
       "project_ids": ["prj_5KQNqqtgRj3vjbvyD54bJHMHCHTC"],
       "cycle_start_day": 25,
+      "rolling_days": 30,
       "dashboard": "ciuc/job-radar"
     },
     "neon": {
