@@ -10,15 +10,16 @@
     "vercel": {
       "team_id": "team_XYAR6gQjlQ9RQ1Mzy4dK7nvC",
       "project_ids": ["prj_5KQNqqtgRj3vjbvyD54bJHMHCHTC"],
-      "cycle_start_day": 25
+      "cycle_start_day": 25,
+      "dashboard": "ciuc/job-radar"
     },
     "neon": {
       "project_ids": ["shiny-flower-58559384", "calm-firefly-57379658"]
     },
     "labels": {
-      "team_XYAR6gQjlQ9RQ1Mzy4dK7nvC": "Hobby team",
-      "shiny-flower-58559384": "production database",
-      "calm-firefly-57379658": "dev database"
+      "team_XYAR6gQjlQ9RQ1Mzy4dK7nvC": "Hobby",
+      "shiny-flower-58559384": "prod",
+      "calm-firefly-57379658": "dev"
     },
     "sentry": {
       "org": "ciuculescu",
