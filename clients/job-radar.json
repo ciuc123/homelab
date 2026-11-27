@@ -17,6 +17,10 @@
     "neon": {
       "project_ids": ["sweet-tree-29229686", "calm-firefly-57379658"]
     },
+    "limits": {
+      "vercel-cpu": {"value": 720, "until": "2026-12-26", "note": "Vercel 3x for one month after the 2026-11-26 unblock"},
+      "vercel-invocations": {"value": 3000000, "until": "2026-12-26", "note": "Vercel 3x for one month after the 2026-11-26 unblock"}
+    },
     "labels": {
       "team_XYAR6gQjlQ9RQ1Mzy4dK7nvC": "Hobby",
       "sweet-tree-29229686": "prod",
