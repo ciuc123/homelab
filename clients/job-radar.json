@@ -2,9 +2,9 @@
   "name": "job-radar",
   "repo": "ciuc123/job-radar",
   "domain": "jobs.ciuculescu.com",
-  "note": "registered by hand on 2026-11-24 for the usage guard; not provisioned by infra-template",
+  "note": "registered by hand on 2026-11-24 for the usage guard; not provisioned by infra-template; production moved from shiny-flower-58559384 to sweet-tree-29229686 on 2026-11-27 when the old project's transfer ran out",
   "vercel_project_id": "prj_5KQNqqtgRj3vjbvyD54bJHMHCHTC",
-  "neon_project_id": "shiny-flower-58559384",
+  "neon_project_id": "sweet-tree-29229686",
   "usage": {
     "github_repo": "ciuc123/job-radar",
     "vercel": {
@@ -15,7 +15,7 @@
       "dashboard": "ciuc/job-radar"
     },
     "neon": {
-      "project_ids": ["shiny-flower-58559384", "calm-firefly-57379658"]
+      "project_ids": ["sweet-tree-29229686", "calm-firefly-57379658"]
     },
     "limits": {
       "vercel-cpu": {"value": 720, "until": "2026-12-26", "note": "Vercel 3x for one month after the 2026-11-26 unblock"},
@@ -23,7 +23,7 @@
     },
     "labels": {
       "team_XYAR6gQjlQ9RQ1Mzy4dK7nvC": "Hobby",
-      "shiny-flower-58559384": "prod",
+      "sweet-tree-29229686": "prod",
       "calm-firefly-57379658": "dev"
     },
     "sentry": {
